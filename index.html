@@ -1,0 +1,665 @@
+<!DOCTYPE html>
+<html lang="de">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Ordermaske – Geldanlagekurs</title>
+  <style>
+    :root {
+      --bg: #f5f7fb;
+      --card: #ffffff;
+      --text: #1f2937;
+      --muted: #6b7280;
+      --line: #dbe2ea;
+      --accent: #1d4ed8;
+      --accent-2: #eff6ff;
+      --good: #166534;
+      --good-bg: #ecfdf5;
+      --warn: #92400e;
+      --warn-bg: #fffbeb;
+      --bad: #991b1b;
+      --bad-bg: #fef2f2;
+      --shadow: 0 8px 24px rgba(15, 23, 42, 0.08);
+      --radius: 14px;
+    }
+    * { box-sizing: border-box; }
+    body {
+      margin: 0;
+      font-family: Inter, system-ui, -apple-system, Segoe UI, Roboto, Arial, sans-serif;
+      background: var(--bg);
+      color: var(--text);
+      line-height: 1.45;
+    }
+    .wrap {
+      max-width: 1380px;
+      margin: 0 auto;
+      padding: 24px;
+    }
+    header {
+      background: linear-gradient(135deg, #1d4ed8, #2563eb 60%, #60a5fa);
+      color: white;
+      border-radius: 18px;
+      padding: 24px 28px;
+      box-shadow: var(--shadow);
+      margin-bottom: 22px;
+    }
+    header h1 {
+      margin: 0 0 8px;
+      font-size: 30px;
+      line-height: 1.15;
+    }
+    header p {
+      margin: 0;
+      opacity: .94;
+      max-width: 900px;
+    }
+    .grid {
+      display: grid;
+      grid-template-columns: 1.1fr 0.9fr;
+      gap: 22px;
+    }
+    .col {
+      display: grid;
+      gap: 22px;
+      align-content: start;
+    }
+    .card {
+      background: var(--card);
+      border: 1px solid var(--line);
+      border-radius: var(--radius);
+      box-shadow: var(--shadow);
+      overflow: hidden;
+    }
+    .card h2 {
+      margin: 0;
+      font-size: 18px;
+    }
+    .card-header {
+      padding: 16px 18px;
+      border-bottom: 1px solid var(--line);
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      gap: 12px;
+      background: #fbfdff;
+    }
+    .card-body {
+      padding: 18px;
+    }
+    .muted { color: var(--muted); }
+    .badge {
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      padding: 5px 10px;
+      border-radius: 999px;
+      font-size: 12px;
+      font-weight: 600;
+      background: var(--accent-2);
+      color: var(--accent);
+      white-space: nowrap;
+    }
+    .form-grid {
+      display: grid;
+      grid-template-columns: repeat(2, minmax(0, 1fr));
+      gap: 14px 16px;
+    }
+    .full { grid-column: 1 / -1; }
+    label {
+      display: block;
+      font-size: 13px;
+      font-weight: 700;
+      margin-bottom: 6px;
+      color: #334155;
+    }
+    input, select, .readonly {
+      width: 100%;
+      padding: 11px 12px;
+      border-radius: 10px;
+      border: 1px solid #cfd8e3;
+      background: white;
+      color: var(--text);
+      font-size: 14px;
+    }
+    .readonly {
+      background: #f8fafc;
+    }
+    .field-help {
+      margin-top: 6px;
+      font-size: 12px;
+      color: var(--muted);
+    }
+    .pill-row, .tab-row {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 8px;
+    }
+    .pill, .tab {
+      padding: 10px 12px;
+      border-radius: 10px;
+      border: 1px solid #cfd8e3;
+      background: white;
+      cursor: pointer;
+      font-size: 13px;
+      font-weight: 700;
+      color: #334155;
+      user-select: none;
+    }
+    .pill.active, .tab.active {
+      background: var(--accent-2);
+      border-color: #93c5fd;
+      color: var(--accent);
+    }
+    .quote-grid {
+      display: grid;
+      grid-template-columns: repeat(4, minmax(0, 1fr));
+      gap: 12px;
+    }
+    .quote-box {
+      border: 1px solid var(--line);
+      border-radius: 12px;
+      padding: 12px;
+      background: #f8fafc;
+    }
+    .quote-box .k { font-size: 12px; color: var(--muted); margin-bottom: 3px; }
+    .quote-box .v { font-size: 22px; font-weight: 800; }
+    .quote-box .s { font-size: 12px; color: var(--muted); margin-top: 2px; }
+    .mini-table {
+      width: 100%;
+      border-collapse: collapse;
+      font-size: 14px;
+    }
+    .mini-table th, .mini-table td {
+      border-bottom: 1px solid var(--line);
+      padding: 9px 6px;
+      text-align: left;
+    }
+    .mini-table th {
+      font-size: 12px;
+      text-transform: uppercase;
+      letter-spacing: .03em;
+      color: var(--muted);
+      background: #fbfdff;
+    }
+    .mini-table tr:last-child td { border-bottom: none; }
+    .right { text-align: right; }
+    .summary-list {
+      display: grid;
+      gap: 10px;
+    }
+    .summary-item {
+      display: flex;
+      justify-content: space-between;
+      gap: 12px;
+      padding: 10px 0;
+      border-bottom: 1px solid var(--line);
+    }
+    .summary-item:last-child { border-bottom: none; }
+    .summary-item strong { font-size: 15px; }
+    .highlight {
+      padding: 14px;
+      border-radius: 12px;
+      margin-top: 14px;
+      font-size: 14px;
+    }
+    .warn { background: var(--warn-bg); color: var(--warn); border: 1px solid #fcd34d; }
+    .good { background: var(--good-bg); color: var(--good); border: 1px solid #86efac; }
+    .bad { background: var(--bad-bg); color: var(--bad); border: 1px solid #fca5a5; }
+    .legend {
+      display: grid;
+      grid-template-columns: repeat(2, minmax(0, 1fr));
+      gap: 10px 14px;
+      font-size: 13px;
+    }
+    .legend div {
+      background: #f8fafc;
+      border: 1px solid var(--line);
+      border-radius: 10px;
+      padding: 10px 12px;
+    }
+    .footer-note {
+      margin-top: 18px;
+      font-size: 12px;
+      color: var(--muted);
+    }
+    @media (max-width: 1050px) {
+      .grid { grid-template-columns: 1fr; }
+    }
+    @media (max-width: 700px) {
+      .form-grid, .quote-grid, .legend { grid-template-columns: 1fr; }
+      .wrap { padding: 14px; }
+      header { padding: 20px; }
+      header h1 { font-size: 24px; }
+    }
+  </style>
+</head>
+<body>
+  <div class="wrap">
+    <header>
+      <h1>Interaktive Ordermaske für den Geldanlagekurs</h1>
+      <p>
+        Diese Seite simuliert die wichtigsten Eingaben und Anzeigen einer echten Wertpapierorder: ISIN,
+        Börsenplatz, Geld-/Briefkurs, Order-Art, Stückzahl, Orderzusatz, Gültigkeit und geschätzte Kosten.
+        Ideal zum Zeigen per Beamer, ohne in ein reales Depot zu gehen.
+      </p>
+    </header>
+
+    <div class="grid">
+      <div class="col">
+        <section class="card">
+          <div class="card-header">
+            <h2>1. Order eingeben</h2>
+            <span class="badge">Kauforder – Demo</span>
+          </div>
+          <div class="card-body">
+            <div class="form-grid">
+              <div class="full">
+                <label for="isin">ISIN / WKN / Wertpapiername</label>
+                <input id="isin" value="IE00B4L5Y983" />
+                <div class="field-help">Beispiel: ETF-ISIN eingeben. Der Kursbereich rechts reagiert mit Demo-Daten.</div>
+              </div>
+
+              <div>
+                <label for="name">Wertpapier</label>
+                <div id="name" class="readonly">iShares Core MSCI World UCITS ETF USD (Acc)</div>
+              </div>
+              <div>
+                <label for="ticker">Ticker / Kürzel</label>
+                <div id="ticker" class="readonly">EUNL</div>
+              </div>
+
+              <div class="full">
+                <label>Auftrag</label>
+                <div class="pill-row" id="sidePills">
+                  <button class="pill active" data-side="buy">Kauf</button>
+                  <button class="pill" data-side="sell">Verkauf</button>
+                </div>
+              </div>
+
+              <div>
+                <label for="exchange">Börsenplatz</label>
+                <select id="exchange">
+                  <option value="gettex">gettex</option>
+                  <option value="tradegate">Tradegate</option>
+                  <option value="xetra">Xetra</option>
+                  <option value="lsx">LS Exchange</option>
+                  <option value="quotrix">Quotrix</option>
+                </select>
+              </div>
+
+              <div>
+                <label for="quantity">Stückzahl</label>
+                <input id="quantity" type="number" min="1" step="1" value="10" />
+              </div>
+
+              <div class="full">
+                <label>Order-Art</label>
+                <div class="tab-row" id="orderTypeTabs">
+                  <button class="tab active" data-type="market">Market</button>
+                  <button class="tab" data-type="limit">Limit</button>
+                  <button class="tab" data-type="stop">Stop</button>
+                  <button class="tab" data-type="stopLimit">Stop-Limit</button>
+                </div>
+              </div>
+
+              <div id="limitWrap" style="display:none;">
+                <label for="limitPrice">Limitpreis (€)</label>
+                <input id="limitPrice" type="number" step="0.01" value="102.40" />
+                <div class="field-help">Maximaler Kaufpreis bzw. minimaler Verkaufspreis.</div>
+              </div>
+
+              <div id="stopWrap" style="display:none;">
+                <label for="stopPrice">Stop-Kurs (€)</label>
+                <input id="stopPrice" type="number" step="0.01" value="101.80" />
+                <div class="field-help">Bei Erreichen wird die Order ausgelöst.</div>
+              </div>
+
+              <div>
+                <label for="validity">Gültigkeit</label>
+                <select id="validity">
+                  <option value="day">Tagesgültig</option>
+                  <option value="gtc">Gültig bis Widerruf (GTC)</option>
+                  <option value="date">Gültig bis Datum</option>
+                </select>
+              </div>
+
+              <div id="validUntilWrap" style="display:none;">
+                <label for="validUntil">Gültig bis</label>
+                <input id="validUntil" type="date" />
+              </div>
+
+              <div>
+                <label for="feeModel">Preis-/Gebührenmodell</label>
+                <select id="feeModel">
+                  <option value="neo">Neobroker: 1,00 € Fremdkostenpauschale</option>
+                  <option value="bank">Direktbank: 4,90 € + 0,25 %</option>
+                  <option value="flat">Flat Fee: 5,90 €</option>
+                </select>
+              </div>
+
+              <div>
+                <label for="savingsPlan">Ausführung</label>
+                <select id="savingsPlan">
+                  <option value="single">Einmalorder</option>
+                  <option value="partial">Teilausführung möglich</option>
+                  <option value="none">Nur vollständige Ausführung</option>
+                </select>
+              </div>
+            </div>
+          </div>
+        </section>
+
+        <section class="card">
+          <div class="card-header">
+            <h2>2. Marktumfeld / Kursstellung</h2>
+            <span class="badge">Geld / Brief / Spread</span>
+          </div>
+          <div class="card-body">
+            <div class="quote-grid">
+              <div class="quote-box">
+                <div class="k">Geldkurs (Bid)</div>
+                <div class="v" id="bidOut">102,31 €</div>
+                <div class="s">höchstes Kaufgebot</div>
+              </div>
+              <div class="quote-box">
+                <div class="k">Briefkurs (Ask)</div>
+                <div class="v" id="askOut">102,36 €</div>
+                <div class="s">günstigstes Verkaufsangebot</div>
+              </div>
+              <div class="quote-box">
+                <div class="k">Spread</div>
+                <div class="v" id="spreadOut">0,05 €</div>
+                <div class="s" id="spreadPctOut">0,049 %</div>
+              </div>
+              <div class="quote-box">
+                <div class="k">Referenzkurs</div>
+                <div class="v" id="lastOut">102,34 €</div>
+                <div class="s">letzte Preisfeststellung</div>
+              </div>
+            </div>
+
+            <div style="margin-top:16px; overflow:auto;">
+              <table class="mini-table">
+                <thead>
+                  <tr>
+                    <th>Platz</th>
+                    <th>Geld</th>
+                    <th>Brief</th>
+                    <th>Spread</th>
+                    <th>Handelszeit</th>
+                  </tr>
+                </thead>
+                <tbody id="exchangeTableBody"></tbody>
+              </table>
+            </div>
+          </div>
+        </section>
+      </div>
+
+      <div class="col">
+        <section class="card">
+          <div class="card-header">
+            <h2>3. Voraussichtliche Ausführung</h2>
+            <span class="badge">didaktische Vorschau</span>
+          </div>
+          <div class="card-body">
+            <div class="summary-list">
+              <div class="summary-item"><span>Order-Art</span><strong id="summaryType">Market</strong></div>
+              <div class="summary-item"><span>Börsenplatz</span><strong id="summaryExchange">gettex</strong></div>
+              <div class="summary-item"><span>Stückzahl</span><strong id="summaryQty">10</strong></div>
+              <div class="summary-item"><span>geschätzter Ausführungskurs</span><strong id="execPrice">102,36 €</strong></div>
+              <div class="summary-item"><span>Ordervolumen</span><strong id="volumeOut">1.023,60 €</strong></div>
+              <div class="summary-item"><span>geschätzte Gebühren</span><strong id="feesOut">1,00 €</strong></div>
+              <div class="summary-item"><span>Gesamtbetrag</span><strong id="totalOut">1.024,60 €</strong></div>
+            </div>
+
+            <div id="statusBox" class="highlight good">
+              Diese Demo-Order wäre als <strong>Market-Kauf</strong> voraussichtlich sofort zum aktuellen <strong>Briefkurs</strong> ausführbar.
+            </div>
+          </div>
+        </section>
+
+        <section class="card">
+          <div class="card-header">
+            <h2>4. Didaktische Erklärung der Felder</h2>
+            <span class="badge">für den Kurs</span>
+          </div>
+          <div class="card-body">
+            <div class="legend">
+              <div><strong>ISIN</strong><br><span class="muted">Eindeutige Kennnummer des Wertpapiers.</span></div>
+              <div><strong>Geldkurs</strong><br><span class="muted">Preis, zu dem aktuell jemand kaufen will.</span></div>
+              <div><strong>Briefkurs</strong><br><span class="muted">Preis, zu dem aktuell jemand verkaufen will.</span></div>
+              <div><strong>Spread</strong><br><span class="muted">Differenz zwischen Geld und Brief.</span></div>
+              <div><strong>Market-Order</strong><br><span class="muted">Sofort zum besten verfügbaren Preis.</span></div>
+              <div><strong>Limit-Order</strong><br><span class="muted">Nur bis zu einem festgelegten Preis.</span></div>
+              <div><strong>Stop</strong><br><span class="muted">Wird erst ab einem Auslösekurs aktiviert.</span></div>
+              <div><strong>Gültigkeit</strong><br><span class="muted">Wie lange die Order aktiv bleiben soll.</span></div>
+              <div><strong>Börsenplatz</strong><br><span class="muted">Dort wird die Order ausgeführt; Preise können leicht variieren.</span></div>
+              <div><strong>Kosten</strong><br><span class="muted">Broker-Gebühr, Fremdkosten und indirekt auch Spread.</span></div>
+            </div>
+            <div class="footer-note">
+              Tipp für deinen Kurs: Lass die Teilnehmenden erst vermuten, was Geld- und Briefkurs bedeuten, bevor du die Auflösung zeigst.
+            </div>
+          </div>
+        </section>
+
+        <section class="card">
+          <div class="card-header">
+            <h2>5. Typische Rückfragen</h2>
+            <span class="badge">Aha-Momente</span>
+          </div>
+          <div class="card-body">
+            <table class="mini-table">
+              <tbody>
+                <tr><td><strong>Warum zahle ich beim Kauf den höheren Kurs?</strong></td><td>Weil du zum aktuellen Verkaufsangebot kaufst: dem Briefkurs.</td></tr>
+                <tr><td><strong>Warum unterscheiden sich Börsenplätze?</strong></td><td>Liquidität, Handelszeiten und Gebühren können leicht verschieden sein.</td></tr>
+                <tr><td><strong>Was ist bei Market riskant?</strong></td><td>Du kennst den exakten Ausführungspreis vorher nicht.</td></tr>
+                <tr><td><strong>Was schützt ein Limit?</strong></td><td>Dass du nicht teurer kaufst als dein Maximalpreis.</td></tr>
+                <tr><td><strong>Welche „unsichtbaren“ Kosten gibt es?</strong></td><td>Neben Gebühren vor allem Spread und eventuell Abweichungen zwischen Plätzen.</td></tr>
+              </tbody>
+            </table>
+          </div>
+        </section>
+      </div>
+    </div>
+  </div>
+
+  <script>
+    const securities = {
+      'IE00B4L5Y983': {
+        name: 'iShares Core MSCI World UCITS ETF USD (Acc)',
+        ticker: 'EUNL',
+        base: { bid: 102.31, ask: 102.36, last: 102.34 }
+      },
+      'IE00BK5BQT80': {
+        name: 'Vanguard FTSE All-World UCITS ETF (USD) Accumulating',
+        ticker: 'VWCE',
+        base: { bid: 118.62, ask: 118.70, last: 118.66 }
+      },
+      'LU1931974692': {
+        name: 'Amundi Prime Global UCITS ETF DR',
+        ticker: 'PRIW',
+        base: { bid: 34.22, ask: 34.26, last: 34.24 }
+      }
+    };
+
+    const exchangeAdjustments = {
+      gettex:    { bid: -0.01, ask: 0.00, time: '08:00–22:00' },
+      tradegate: { bid:  0.00, ask: 0.01, time: '08:00–22:00' },
+      xetra:     { bid:  0.01, ask: 0.00, time: '09:00–17:30' },
+      lsx:       { bid: -0.02, ask: 0.02, time: '07:30–23:00' },
+      quotrix:   { bid: -0.01, ask: 0.01, time: '07:30–23:00' }
+    };
+
+    const el = id => document.getElementById(id);
+    const eur = n => new Intl.NumberFormat('de-DE', { style: 'currency', currency: 'EUR' }).format(n);
+    const pct = n => new Intl.NumberFormat('de-DE', { minimumFractionDigits: 3, maximumFractionDigits: 3 }).format(n) + ' %';
+
+    let side = 'buy';
+    let orderType = 'market';
+
+    function getSecurity() {
+      const raw = el('isin').value.trim().toUpperCase();
+      return securities[raw] || securities['IE00B4L5Y983'];
+    }
+
+    function currentQuotesFor(exchangeKey) {
+      const sec = getSecurity();
+      const adj = exchangeAdjustments[exchangeKey];
+      return {
+        bid: +(sec.base.bid + adj.bid).toFixed(2),
+        ask: +(sec.base.ask + adj.ask).toFixed(2),
+        last: +(sec.base.last + (adj.bid + adj.ask) / 2).toFixed(2),
+        time: adj.time
+      };
+    }
+
+    function updateSecurity() {
+      const raw = el('isin').value.trim().toUpperCase();
+      const sec = securities[raw] || securities['IE00B4L5Y983'];
+      el('name').textContent = sec.name;
+      el('ticker').textContent = sec.ticker;
+
+      const defaultLimit = sec.base.ask + 0.04;
+      const defaultStop = sec.base.bid - 0.05;
+      el('limitPrice').value = defaultLimit.toFixed(2);
+      el('stopPrice').value = defaultStop.toFixed(2);
+    }
+
+    function renderExchangeTable() {
+      const tbody = el('exchangeTableBody');
+      tbody.innerHTML = '';
+      Object.keys(exchangeAdjustments).forEach(key => {
+        const q = currentQuotesFor(key);
+        const spread = +(q.ask - q.bid).toFixed(2);
+        const tr = document.createElement('tr');
+        tr.innerHTML = `
+          <td>${key}</td>
+          <td>${eur(q.bid)}</td>
+          <td>${eur(q.ask)}</td>
+          <td>${eur(spread)}</td>
+          <td>${q.time}</td>
+        `;
+        tbody.appendChild(tr);
+      });
+    }
+
+    function feeFor(orderVolume) {
+      const m = el('feeModel').value;
+      if (m === 'neo') return 1.00;
+      if (m === 'flat') return 5.90;
+      return 4.90 + orderVolume * 0.0025;
+    }
+
+    function updateConditionalFields() {
+      el('limitWrap').style.display = (orderType === 'limit' || orderType === 'stopLimit') ? 'block' : 'none';
+      el('stopWrap').style.display = (orderType === 'stop' || orderType === 'stopLimit') ? 'block' : 'none';
+      el('validUntilWrap').style.display = el('validity').value === 'date' ? 'block' : 'none';
+    }
+
+    function updateSummary() {
+      updateSecurity();
+      renderExchangeTable();
+
+      const exchange = el('exchange').value;
+      const qty = Math.max(1, Number(el('quantity').value) || 1);
+      const q = currentQuotesFor(exchange);
+      const spread = +(q.ask - q.bid).toFixed(2);
+      const spreadPct = spread / q.last * 100;
+
+      el('bidOut').textContent = eur(q.bid);
+      el('askOut').textContent = eur(q.ask);
+      el('spreadOut').textContent = eur(spread);
+      el('spreadPctOut').textContent = pct(spreadPct);
+      el('lastOut').textContent = eur(q.last);
+
+      let execPrice = side === 'buy' ? q.ask : q.bid;
+      let message = '';
+      let statusClass = 'good';
+      const limit = Number(el('limitPrice').value) || 0;
+      const stop = Number(el('stopPrice').value) || 0;
+
+      if (orderType === 'market') {
+        message = side === 'buy'
+          ? 'Diese Demo-Order wäre als <strong>Market-Kauf</strong> voraussichtlich sofort zum aktuellen <strong>Briefkurs</strong> ausführbar.'
+          : 'Diese Demo-Order wäre als <strong>Market-Verkauf</strong> voraussichtlich sofort zum aktuellen <strong>Geldkurs</strong> ausführbar.';
+      }
+      if (orderType === 'limit') {
+        execPrice = limit;
+        const executable = side === 'buy' ? limit >= q.ask : limit <= q.bid;
+        if (executable) {
+          statusClass = 'good';
+          execPrice = side === 'buy' ? Math.min(limit, q.ask) : Math.max(limit, q.bid);
+          message = 'Die <strong>Limit-Order</strong> wäre nach diesen Demo-Daten sofort ausführbar, weil dein Limit bereits marktgerecht ist.';
+        } else {
+          statusClass = 'warn';
+          message = 'Die <strong>Limit-Order</strong> würde im Orderbuch liegen bleiben, bis der Markt deinen Preis erreicht.';
+        }
+      }
+      if (orderType === 'stop') {
+        statusClass = 'warn';
+        execPrice = side === 'buy' ? Math.max(stop, q.ask) : Math.min(stop, q.bid);
+        message = 'Die <strong>Stop-Order</strong> wird erst aktiv, wenn der Stop-Kurs erreicht oder überschritten/unterschritten wird. Danach erfolgt typischerweise eine Market-Order.';
+      }
+      if (orderType === 'stopLimit') {
+        statusClass = 'warn';
+        execPrice = limit;
+        message = 'Die <strong>Stop-Limit-Order</strong> wird erst am Stop-Kurs aktiviert und dann nur bis zu deinem gesetzten Limit ausgeführt.';
+      }
+
+      const volume = execPrice * qty;
+      const fees = feeFor(volume);
+      const total = side === 'buy' ? volume + fees : volume - fees;
+
+      el('summaryType').textContent = document.querySelector('.tab.active').textContent;
+      el('summaryExchange').textContent = exchange;
+      el('summaryQty').textContent = qty.toString();
+      el('execPrice').textContent = eur(execPrice);
+      el('volumeOut').textContent = eur(volume);
+      el('feesOut').textContent = eur(fees);
+      el('totalOut').textContent = eur(total);
+
+      const statusBox = el('statusBox');
+      statusBox.className = 'highlight ' + statusClass;
+      statusBox.innerHTML = message;
+    }
+
+    document.querySelectorAll('#sidePills .pill').forEach(btn => {
+      btn.addEventListener('click', () => {
+        document.querySelectorAll('#sidePills .pill').forEach(b => b.classList.remove('active'));
+        btn.classList.add('active');
+        side = btn.dataset.side;
+        updateSummary();
+      });
+    });
+
+    document.querySelectorAll('#orderTypeTabs .tab').forEach(btn => {
+      btn.addEventListener('click', () => {
+        document.querySelectorAll('#orderTypeTabs .tab').forEach(b => b.classList.remove('active'));
+        btn.classList.add('active');
+        orderType = btn.dataset.type;
+        updateConditionalFields();
+        updateSummary();
+      });
+    });
+
+    ['isin','exchange','quantity','limitPrice','stopPrice','validity','feeModel','savingsPlan','validUntil'].forEach(id => {
+      el(id).addEventListener('input', () => {
+        updateConditionalFields();
+        updateSummary();
+      });
+      el(id).addEventListener('change', () => {
+        updateConditionalFields();
+        updateSummary();
+      });
+    });
+
+    const today = new Date();
+    today.setDate(today.getDate() + 14);
+    el('validUntil').value = today.toISOString().slice(0, 10);
+
+    updateConditionalFields();
+    updateSummary();
+  </script>
+</body>
+</html>
