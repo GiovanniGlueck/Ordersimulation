@@ -23,6 +23,7 @@
       --radius: 14px;
     }
     * { box-sizing: border-box; }
+    html { scroll-behavior: smooth; }
     body {
       margin: 0;
       font-family: Inter, system-ui, -apple-system, Segoe UI, Roboto, Arial, sans-serif;
@@ -51,7 +52,7 @@
     header p {
       margin: 0;
       opacity: .94;
-      max-width: 900px;
+      max-width: 980px;
     }
     .grid {
       display: grid;
@@ -106,7 +107,9 @@
     }
     .full { grid-column: 1 / -1; }
     label {
-      display: block;
+      display: flex;
+      align-items: center;
+      gap: 7px;
       font-size: 13px;
       font-weight: 700;
       margin-bottom: 6px;
@@ -161,7 +164,7 @@
       padding: 12px;
       background: #f8fafc;
     }
-    .quote-box .k { font-size: 12px; color: var(--muted); margin-bottom: 3px; }
+    .quote-box .k { font-size: 12px; color: var(--muted); margin-bottom: 3px; display:flex; align-items:center; gap:6px; }
     .quote-box .v { font-size: 22px; font-weight: 800; }
     .quote-box .s { font-size: 12px; color: var(--muted); margin-top: 2px; }
     .mini-table {
@@ -173,6 +176,7 @@
       border-bottom: 1px solid var(--line);
       padding: 9px 6px;
       text-align: left;
+      vertical-align: top;
     }
     .mini-table th {
       font-size: 12px;
@@ -222,6 +226,77 @@
       font-size: 12px;
       color: var(--muted);
     }
+    .footer-links {
+      margin-top: 10px;
+      display: flex;
+      flex-wrap: wrap;
+      gap: 10px;
+      font-size: 13px;
+    }
+    .footer-links a {
+      color: var(--accent);
+      text-decoration: none;
+      font-weight: 600;
+    }
+    .footer-links a:hover { text-decoration: underline; }
+
+    .info-btn {
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      width: 18px;
+      height: 18px;
+      min-width: 18px;
+      border-radius: 999px;
+      border: 1px solid #93c5fd;
+      background: var(--accent-2);
+      color: var(--accent);
+      font-size: 11px;
+      font-weight: 800;
+      cursor: pointer;
+      line-height: 1;
+      padding: 0;
+    }
+    .info-btn:hover,
+    .info-btn:focus-visible {
+      outline: none;
+      border-color: var(--accent);
+      box-shadow: 0 0 0 3px rgba(29, 78, 216, 0.12);
+    }
+
+    .info-panel {
+      display: none;
+      margin-top: 8px;
+      padding: 10px 12px;
+      border-radius: 10px;
+      border: 1px solid #bfdbfe;
+      background: #f8fbff;
+      color: #1e3a8a;
+      font-size: 12px;
+    }
+    .info-panel.open { display: block; }
+
+    footer.site-footer {
+      margin-top: 26px;
+      background: #fff;
+      border: 1px solid var(--line);
+      border-radius: var(--radius);
+      box-shadow: var(--shadow);
+      padding: 18px;
+      font-size: 13px;
+    }
+    footer.site-footer h2 {
+      font-size: 17px;
+      margin: 0 0 10px;
+    }
+    footer.site-footer p {
+      margin: 8px 0;
+    }
+    footer.site-footer .small {
+      color: var(--muted);
+      font-size: 12px;
+    }
+
     @media (max-width: 1050px) {
       .grid { grid-template-columns: 1fr; }
     }
@@ -230,6 +305,7 @@
       .wrap { padding: 14px; }
       header { padding: 20px; }
       header h1 { font-size: 24px; }
+      .card-header { align-items: flex-start; }
     }
   </style>
 </head>
@@ -238,9 +314,9 @@
     <header>
       <h1>Interaktive Ordermaske für den Geldanlagekurs</h1>
       <p>
-        Diese Seite simuliert die wichtigsten Eingaben und Anzeigen einer echten Wertpapierorder: ISIN,
-        Börsenplatz, Geld-/Briefkurs, Order-Art, Stückzahl, Orderzusatz, Gültigkeit und geschätzte Kosten.
-        Ideal zum Zeigen per Beamer, ohne in ein reales Depot zu gehen.
+        Diese Seite simuliert die wichtigsten Eingaben und Anzeigen einer Wertpapierorder:
+        ISIN, Börsenplatz, Geld-/Briefkurs, Ordertyp, Stückzahl, Gültigkeit, Ausführungsbedingung
+        und geschätzte Kosten. Sie ist für didaktische Zwecke gedacht und ersetzt kein reales Depot.
       </p>
     </header>
 
@@ -249,13 +325,16 @@
         <section class="card">
           <div class="card-header">
             <h2>1. Order eingeben</h2>
-            <span class="badge">Kauforder – Demo</span>
+            <span class="badge">Kauf oder Verkauf – Demo</span>
           </div>
           <div class="card-body">
             <div class="form-grid">
               <div class="full">
-                <label for="isin">ISIN / WKN / Wertpapiername</label>
+                <label for="isin">ISIN / WKN / Wertpapiername
+                  <button class="info-btn" type="button" data-info-target="info-isin" aria-expanded="false" aria-controls="info-isin">i</button>
+                </label>
                 <input id="isin" value="IE00B4L5Y983" />
+                <div id="info-isin" class="info-panel">Hier kannst du eine ISIN eingeben. In dieser Demo reagieren Name, Kürzel und Kursdaten mit Beispielwerten.</div>
                 <div class="field-help">Beispiel: ETF-ISIN eingeben. Der Kursbereich rechts reagiert mit Demo-Daten.</div>
               </div>
 
@@ -269,15 +348,20 @@
               </div>
 
               <div class="full">
-                <label>Auftrag</label>
+                <label>Transaktion
+                  <button class="info-btn" type="button" data-info-target="info-side" aria-expanded="false" aria-controls="info-side">i</button>
+                </label>
                 <div class="pill-row" id="sidePills">
-                  <button class="pill active" data-side="buy">Kauf</button>
-                  <button class="pill" data-side="sell">Verkauf</button>
+                  <button class="pill active" type="button" data-side="buy">Kauf</button>
+                  <button class="pill" type="button" data-side="sell">Verkauf</button>
                 </div>
+                <div id="info-side" class="info-panel">Mit Kauf erwirbst du Stücke. Mit Verkauf veräußerst du vorhandene Stücke. Je nach Richtung ändern sich Geld- und Briefkurs als relevante Seite.</div>
               </div>
 
               <div>
-                <label for="exchange">Börsenplatz</label>
+                <label for="exchange">Börsenplatz
+                  <button class="info-btn" type="button" data-info-target="info-exchange" aria-expanded="false" aria-controls="info-exchange">i</button>
+                </label>
                 <select id="exchange">
                   <option value="gettex">gettex</option>
                   <option value="tradegate">Tradegate</option>
@@ -285,42 +369,58 @@
                   <option value="lsx">LS Exchange</option>
                   <option value="quotrix">Quotrix</option>
                 </select>
+                <div id="info-exchange" class="info-panel">Der Börsenplatz beeinflusst unter anderem Geld-/Briefkurse, Handelszeiten und teils auch Gebühren.</div>
               </div>
 
               <div>
-                <label for="quantity">Stückzahl</label>
+                <label for="quantity">Stückzahl
+                  <button class="info-btn" type="button" data-info-target="info-qty" aria-expanded="false" aria-controls="info-qty">i</button>
+                </label>
                 <input id="quantity" type="number" min="1" step="1" value="10" />
+                <div id="info-qty" class="info-panel">Hier legst du fest, wie viele Anteile du kaufen oder verkaufen möchtest. Das beeinflusst Ordervolumen und Kosten.</div>
               </div>
 
               <div class="full">
-                <label>Order-Art</label>
+                <label>Ordertyp
+                  <button class="info-btn" type="button" data-info-target="info-ordertype" aria-expanded="false" aria-controls="info-ordertype">i</button>
+                </label>
                 <div class="tab-row" id="orderTypeTabs">
-                  <button class="tab active" data-type="market">Market</button>
-                  <button class="tab" data-type="limit">Limit</button>
-                  <button class="tab" data-type="stop">Stop</button>
-                  <button class="tab" data-type="stopLimit">Stop-Limit</button>
+                  <button class="tab active" type="button" data-type="market">Market / Bestens-Billigst</button>
+                  <button class="tab" type="button" data-type="limit">Limit</button>
+                  <button class="tab" type="button" data-type="stop">Stop-Market</button>
+                  <button class="tab" type="button" data-type="stopLimit">Stop-Limit</button>
                 </div>
+                <div id="info-ordertype" class="info-panel">Market bedeutet: Ausführung zum nächstbesten verfügbaren Preis (in Deutschland oft „Bestens“ beim Kauf und „Billigst“ beim Verkauf). Limit begrenzt den Preis. Bei Stop-Market legt der Stop fest, wann die Order ausgelöst wird; danach wird sie als Market-Order ausgeführt. Bei Stop-Limit legt der Stop ebenfalls nur den Auslöser fest; danach wird aber eine Limit-Order eingestellt, die nur zu deinem Limit oder besser ausgeführt wird.</div>
               </div>
 
               <div id="limitWrap" style="display:none;">
-                <label for="limitPrice">Limitpreis (€)</label>
+                <label for="limitPrice">Limitpreis (€)
+                  <button class="info-btn" type="button" data-info-target="info-limit" aria-expanded="false" aria-controls="info-limit">i</button>
+                </label>
                 <input id="limitPrice" type="number" step="0.01" value="102.40" />
+                <div id="info-limit" class="info-panel">Bei einem Kauf ist das dein maximaler Preis. Bei einem Verkauf ist es dein minimal akzeptierter Preis.</div>
                 <div class="field-help">Maximaler Kaufpreis bzw. minimaler Verkaufspreis.</div>
               </div>
 
               <div id="stopWrap" style="display:none;">
-                <label for="stopPrice">Stop-Kurs (€)</label>
+                <label for="stopPrice">Stop-Kurs (€)
+                  <button class="info-btn" type="button" data-info-target="info-stop" aria-expanded="false" aria-controls="info-stop">i</button>
+                </label>
                 <input id="stopPrice" type="number" step="0.01" value="101.80" />
+                <div id="info-stop" class="info-panel">Der Stop-Kurs ist nur der Auslöser. Erst wenn dieser erreicht wird, wird die Order aktiviert. Bei einer Stop-Market-Order folgt dann sofort eine Ausführung zum nächsten verfügbaren Marktpreis. Bei einer Stop-Limit-Order wird danach eine Limit-Order ins Orderbuch gestellt. Wichtig: Der Stop bestimmt also nicht den Ausführungspreis, sondern nur den Zeitpunkt der Aktivierung.</div>
                 <div class="field-help">Bei Erreichen wird die Order ausgelöst.</div>
               </div>
 
               <div>
-                <label for="validity">Gültigkeit</label>
+                <label for="validity">Gültigkeit
+                  <button class="info-btn" type="button" data-info-target="info-validity" aria-expanded="false" aria-controls="info-validity">i</button>
+                </label>
                 <select id="validity">
                   <option value="day">Tagesgültig</option>
                   <option value="gtc">Gültig bis Widerruf (GTC)</option>
                   <option value="date">Gültig bis Datum</option>
                 </select>
+                <div id="info-validity" class="info-panel">Hier legst du fest, wie lange deine Order aktiv bleibt, falls sie nicht sofort ausgeführt wird.</div>
               </div>
 
               <div id="validUntilWrap" style="display:none;">
@@ -329,21 +429,26 @@
               </div>
 
               <div>
-                <label for="feeModel">Preis-/Gebührenmodell</label>
+                <label for="feeModel">Gebührenmodell
+                  <button class="info-btn" type="button" data-info-target="info-fees" aria-expanded="false" aria-controls="info-fees">i</button>
+                </label>
                 <select id="feeModel">
-                  <option value="neo">Neobroker: 1,00 € Fremdkostenpauschale</option>
+                  <option value="neo">Pauschalmodell: 1,00 € je Order</option>
                   <option value="bank">Direktbank: 4,90 € + 0,25 %</option>
                   <option value="flat">Flat Fee: 5,90 €</option>
                 </select>
+                <div id="info-fees" class="info-panel">Die Gebührenmodelle hier sind vereinfachte Demo-Beispiele. In der Praxis hängen Kosten vom Broker, Börsenplatz und Ordervolumen ab.</div>
               </div>
 
               <div>
-                <label for="savingsPlan">Ausführung</label>
-                <select id="savingsPlan">
-                  <option value="single">Einmalorder</option>
+                <label for="executionCondition">Ausführungsbedingung
+                  <button class="info-btn" type="button" data-info-target="info-execcond" aria-expanded="false" aria-controls="info-execcond">i</button>
+                </label>
+                <select id="executionCondition">
                   <option value="partial">Teilausführung möglich</option>
-                  <option value="none">Nur vollständige Ausführung</option>
+                  <option value="fullOnly">Nur vollständige Ausführung</option>
                 </select>
+                <div id="info-execcond" class="info-panel">Teilausführung bedeutet, dass nur ein Teil der Stückzahl ausgeführt werden kann. Bei vollständiger Ausführung muss die gesamte Stückzahl auf einmal handelbar sein.</div>
               </div>
             </div>
           </div>
@@ -357,24 +462,36 @@
           <div class="card-body">
             <div class="quote-grid">
               <div class="quote-box">
-                <div class="k">Geldkurs (Bid)</div>
+                <div class="k">Geldkurs (Bid)
+                  <button class="info-btn" type="button" data-info-target="info-bid" aria-expanded="false" aria-controls="info-bid">i</button>
+                </div>
                 <div class="v" id="bidOut">102,31 €</div>
                 <div class="s">höchstes Kaufgebot</div>
+                <div id="info-bid" class="info-panel">Der Geldkurs ist der höchste Preis, den jemand aktuell zu zahlen bereit ist.</div>
               </div>
               <div class="quote-box">
-                <div class="k">Briefkurs (Ask)</div>
+                <div class="k">Briefkurs (Ask)
+                  <button class="info-btn" type="button" data-info-target="info-ask" aria-expanded="false" aria-controls="info-ask">i</button>
+                </div>
                 <div class="v" id="askOut">102,36 €</div>
                 <div class="s">günstigstes Verkaufsangebot</div>
+                <div id="info-ask" class="info-panel">Der Briefkurs ist der niedrigste Preis, zu dem aktuell jemand verkaufen möchte.</div>
               </div>
               <div class="quote-box">
-                <div class="k">Spread</div>
+                <div class="k">Spread
+                  <button class="info-btn" type="button" data-info-target="info-spread" aria-expanded="false" aria-controls="info-spread">i</button>
+                </div>
                 <div class="v" id="spreadOut">0,05 €</div>
                 <div class="s" id="spreadPctOut">0,049 %</div>
+                <div id="info-spread" class="info-panel">Der Spread ist die Differenz zwischen Geld- und Briefkurs. Er ist ein wichtiger indirekter Kostenfaktor.</div>
               </div>
               <div class="quote-box">
-                <div class="k">Referenzkurs</div>
+                <div class="k">Letzter Kurs
+                  <button class="info-btn" type="button" data-info-target="info-last" aria-expanded="false" aria-controls="info-last">i</button>
+                </div>
                 <div class="v" id="lastOut">102,34 €</div>
-                <div class="s">letzte Preisfeststellung</div>
+                <div class="s">zuletzt gehandelter Preis</div>
+                <div id="info-last" class="info-panel">Das ist der zuletzt festgestellte gehandelte Preis. Er muss nicht dem aktuellen Geld- oder Briefkurs entsprechen.</div>
               </div>
             </div>
 
@@ -404,13 +521,13 @@
           </div>
           <div class="card-body">
             <div class="summary-list">
-              <div class="summary-item"><span>Order-Art</span><strong id="summaryType">Market</strong></div>
+              <div class="summary-item"><span>Ordertyp</span><strong id="summaryType">Market</strong></div>
               <div class="summary-item"><span>Börsenplatz</span><strong id="summaryExchange">gettex</strong></div>
               <div class="summary-item"><span>Stückzahl</span><strong id="summaryQty">10</strong></div>
               <div class="summary-item"><span>geschätzter Ausführungskurs</span><strong id="execPrice">102,36 €</strong></div>
               <div class="summary-item"><span>Ordervolumen</span><strong id="volumeOut">1.023,60 €</strong></div>
               <div class="summary-item"><span>geschätzte Gebühren</span><strong id="feesOut">1,00 €</strong></div>
-              <div class="summary-item"><span>Gesamtbetrag</span><strong id="totalOut">1.024,60 €</strong></div>
+              <div class="summary-item"><span>Gesamtbetrag / Nettoerlös</span><strong id="totalOut">1.024,60 €</strong></div>
             </div>
 
             <div id="statusBox" class="highlight good">
@@ -430,15 +547,20 @@
               <div><strong>Geldkurs</strong><br><span class="muted">Preis, zu dem aktuell jemand kaufen will.</span></div>
               <div><strong>Briefkurs</strong><br><span class="muted">Preis, zu dem aktuell jemand verkaufen will.</span></div>
               <div><strong>Spread</strong><br><span class="muted">Differenz zwischen Geld und Brief.</span></div>
-              <div><strong>Market-Order</strong><br><span class="muted">Sofort zum besten verfügbaren Preis.</span></div>
+              <div><strong>Market-Order</strong><br><span class="muted">Sofortige Ausführung. Kauf = „Bestens“, Verkauf = „Billigst“.</span></div>
               <div><strong>Limit-Order</strong><br><span class="muted">Nur bis zu einem festgelegten Preis.</span></div>
-              <div><strong>Stop</strong><br><span class="muted">Wird erst ab einem Auslösekurs aktiviert.</span></div>
+              <div><strong>Stop-Market</strong><br><span class="muted">Der Stop löst die Order erst aus. Danach wird sie als Market-Order ausgeführt. Hohe Ausführungschance, aber der tatsächliche Preis kann abweichen.</span></div>
+              <div><strong>Stop-Limit</strong><br><span class="muted">Der Stop löst nur aus. Danach wird eine Limit-Order eingestellt. Der Preis ist begrenzt, aber die Ausführung ist nicht sicher.</span></div>
               <div><strong>Gültigkeit</strong><br><span class="muted">Wie lange die Order aktiv bleiben soll.</span></div>
               <div><strong>Börsenplatz</strong><br><span class="muted">Dort wird die Order ausgeführt; Preise können leicht variieren.</span></div>
-              <div><strong>Kosten</strong><br><span class="muted">Broker-Gebühr, Fremdkosten und indirekt auch Spread.</span></div>
+              <div><strong>Kosten</strong><br><span class="muted">Broker-Gebühr, Handelsplatzkosten und indirekt auch Spread.</span></div>
             </div>
             <div class="footer-note">
               Tipp für deinen Kurs: Lass die Teilnehmenden erst vermuten, was Geld- und Briefkurs bedeuten, bevor du die Auflösung zeigst.
+            </div>
+            <div class="footer-links">
+              <a href="#impressum">Zum Impressum</a>
+              <a href="#datenschutz">Zum Datenschutz</a>
             </div>
           </div>
         </section>
@@ -454,25 +576,39 @@
                 <tr><td><strong>Warum zahle ich beim Kauf den höheren Kurs?</strong></td><td>Weil du zum aktuellen Verkaufsangebot kaufst: dem Briefkurs.</td></tr>
                 <tr><td><strong>Warum unterscheiden sich Börsenplätze?</strong></td><td>Liquidität, Handelszeiten und Gebühren können leicht verschieden sein.</td></tr>
                 <tr><td><strong>Was ist bei Market riskant?</strong></td><td>Du kennst den exakten Ausführungspreis vorher nicht.</td></tr>
-                <tr><td><strong>Was schützt ein Limit?</strong></td><td>Dass du nicht teurer kaufst als dein Maximalpreis.</td></tr>
-                <tr><td><strong>Welche „unsichtbaren“ Kosten gibt es?</strong></td><td>Neben Gebühren vor allem Spread und eventuell Abweichungen zwischen Plätzen.</td></tr>
+                <tr><td><strong>Was schützt ein Limit?</strong></td><td>Beim Kauf: nicht teurer als dein Maximalpreis. Beim Verkauf: nicht billiger als dein Mindestpreis.</td></tr>
+                <tr><td><strong>Worin unterscheiden sich Stop-Market und Stop-Limit?</strong></td><td>Stop-Market: Auslösung durch Stop, danach sofortige Market-Order. Stop-Limit: Auslösung durch Stop, danach Limit-Order. Also Preisrisiko versus Ausführungsrisiko.</td></tr>
               </tbody>
             </table>
           </div>
         </section>
       </div>
     </div>
+
+    <footer class="site-footer" id="impressum">
+      <h2>Impressum und Hinweise</h2>
+      <p><strong>Verantwortlich für den Inhalt:</strong><br>
+      Hans Glück<br>
+      Katholisches Kreisbildungswerk Traunstein e. V.<br>
+      Vonfichtstraße 1<br>
+      83278 Traunstein</p>
+
+      <p><strong>Zweck dieser Seite:</strong><br>
+      Diese Simulation dient ausschließlich Bildungs- und Demonstrationszwecken im Rahmen eines Geldanlagekurses.
+      Sie stellt keine Anlageberatung, keine Anlagevermittlung und keine Aufforderung zum Kauf oder Verkauf von Wertpapieren dar.</p>
+
+      <p class="small">Ergänze vor der Veröffentlichung am besten noch eine Kontaktmöglichkeit, falls du die Seite öffentlich betreibst.</p>
+
+      <p id="datenschutz"><strong>Datenschutzhinweis:</strong><br>
+      Diese Seite kann über GitHub Pages oder einen vergleichbaren Hosting-Dienst bereitgestellt werden.
+      Beim Aufruf können durch den Hosting-Anbieter technisch notwendige Daten wie IP-Adresse, Zeitpunkt des Abrufs
+      und Browserinformationen verarbeitet werden. Diese Demo selbst verwendet keine Cookies, keine Formulare
+      und kein eingebautes Tracking.</p>
+
+      <p class="small"><strong>Inhaltliche Grundlage:</strong> Eigene didaktische Darstellung auf Basis gebräuchlicher Orderbegriffe wie ISIN, Geldkurs, Briefkurs, Spread, Market-, Limit-, Stop-Market- und Stop-Limit-Order.</p>
+    </footer>
   </div>
-<hr>
-<p><strong>Hinweis:</strong> Diese Simulation dient ausschließlich zu Bildungszwecken und stellt keine Anlageberatung dar.</p>
 
-<p><strong>Impressum:</strong><br>
-Hans Glück<br>
-Katholisches Kreisbildungswerk Traunstein e. V.<br>
-glueck@kbw-traunstein.de</p>
-
-<p><strong>Datenschutz:</strong><br>
-Diese Website wird über GitHub Pages bereitgestellt. Beim Aufruf können technische Daten (z. B. IP-Adresse) durch den Hosting-Anbieter verarbeitet werden.</p>
   <script>
     const securities = {
       'IE00B4L5Y983': {
@@ -602,25 +738,25 @@ Diese Website wird über GitHub Pages bereitgestellt. Beim Aufruf können techni
           message = 'Die <strong>Limit-Order</strong> wäre nach diesen Demo-Daten sofort ausführbar, weil dein Limit bereits marktgerecht ist.';
         } else {
           statusClass = 'warn';
-          message = 'Die <strong>Limit-Order</strong> würde im Orderbuch liegen bleiben, bis der Markt deinen Preis erreicht.';
+          message = 'Die <strong>Limit-Order</strong> würde zunächst offen bleiben, bis der Markt dein Limit erreicht.';
         }
       }
       if (orderType === 'stop') {
         statusClass = 'warn';
         execPrice = side === 'buy' ? Math.max(stop, q.ask) : Math.min(stop, q.bid);
-        message = 'Die <strong>Stop-Order</strong> wird erst aktiv, wenn der Stop-Kurs erreicht oder überschritten/unterschritten wird. Danach erfolgt typischerweise eine Market-Order.';
+        message = 'Die <strong>Stop-Market-Order</strong> wird erst aktiv, wenn der Stop-Kurs erreicht wird. Der Stop ist nur der Auslöser; danach erfolgt eine Ausführung als Market-Order zum nächsten verfügbaren Preis.';
       }
       if (orderType === 'stopLimit') {
         statusClass = 'warn';
         execPrice = limit;
-        message = 'Die <strong>Stop-Limit-Order</strong> wird erst am Stop-Kurs aktiviert und dann nur bis zu deinem gesetzten Limit ausgeführt.';
+        message = 'Die <strong>Stop-Limit-Order</strong> wird erst beim Stop-Kurs aktiviert. Danach wird eine Limit-Order eingestellt, die nur zu deinem Limit oder besser ausgeführt wird. Sie kann also auch unausgeführt bleiben.';
       }
 
       const volume = execPrice * qty;
       const fees = feeFor(volume);
       const total = side === 'buy' ? volume + fees : volume - fees;
 
-      el('summaryType').textContent = document.querySelector('.tab.active').textContent;
+      el('summaryType').textContent = document.querySelector('#orderTypeTabs .tab.active').textContent;
       el('summaryExchange').textContent = exchange;
       el('summaryQty').textContent = qty.toString();
       el('execPrice').textContent = eur(execPrice);
@@ -652,7 +788,7 @@ Diese Website wird über GitHub Pages bereitgestellt. Beim Aufruf können techni
       });
     });
 
-    ['isin','exchange','quantity','limitPrice','stopPrice','validity','feeModel','savingsPlan','validUntil'].forEach(id => {
+    ['isin','exchange','quantity','limitPrice','stopPrice','validity','feeModel','executionCondition','validUntil'].forEach(id => {
       el(id).addEventListener('input', () => {
         updateConditionalFields();
         updateSummary();
@@ -660,6 +796,15 @@ Diese Website wird über GitHub Pages bereitgestellt. Beim Aufruf können techni
       el(id).addEventListener('change', () => {
         updateConditionalFields();
         updateSummary();
+      });
+    });
+
+    document.querySelectorAll('.info-btn').forEach(btn => {
+      btn.addEventListener('click', () => {
+        const target = el(btn.dataset.infoTarget);
+        const willOpen = !target.classList.contains('open');
+        target.classList.toggle('open');
+        btn.setAttribute('aria-expanded', willOpen ? 'true' : 'false');
       });
     });
 
