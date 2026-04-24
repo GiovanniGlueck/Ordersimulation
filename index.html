@@ -1,819 +1,192 @@
 <!DOCTYPE html>
 <html lang="de">
 <head>
-  <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Ordermaske – Geldanlagekurs</title>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Ordermaske und Altersvorsorge-Rechner</title>
   <style>
     :root {
-      --bg: #f5f7fb;
-      --card: #ffffff;
-      --text: #1f2937;
-      --muted: #6b7280;
-      --line: #dbe2ea;
+      --bg: #eef3f9;
+      --text: #1e293b;
+      --muted: #64748b;
+      --line: #d8e1ec;
       --accent: #1d4ed8;
-      --accent-2: #eff6ff;
-      --good: #166534;
-      --good-bg: #ecfdf5;
-      --warn: #92400e;
-      --warn-bg: #fffbeb;
-      --bad: #991b1b;
-      --bad-bg: #fef2f2;
-      --shadow: 0 8px 24px rgba(15, 23, 42, 0.08);
-      --radius: 14px;
+      --shadow: 0 10px 28px rgba(15, 23, 42, 0.08);
     }
+
     * { box-sizing: border-box; }
-    html { scroll-behavior: smooth; }
+
     body {
       margin: 0;
-      font-family: Inter, system-ui, -apple-system, Segoe UI, Roboto, Arial, sans-serif;
+      font-family: system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
       background: var(--bg);
       color: var(--text);
-      line-height: 1.45;
     }
+
     .wrap {
-      max-width: 1380px;
-      margin: 0 auto;
-      padding: 24px;
-    }
-    header {
-      background: linear-gradient(135deg, #1d4ed8, #2563eb 60%, #60a5fa);
-      color: white;
-      border-radius: 18px;
-      padding: 24px 28px;
-      box-shadow: var(--shadow);
-      margin-bottom: 22px;
-    }
-    header h1 {
-      margin: 0 0 8px;
-      font-size: 30px;
-      line-height: 1.15;
-    }
-    header p {
-      margin: 0;
-      opacity: .94;
-      max-width: 980px;
-    }
-    .grid {
+      min-height: 100vh;
       display: grid;
-      grid-template-columns: 1.1fr 0.9fr;
-      gap: 22px;
+      grid-template-rows: auto 1fr;
     }
-    .col {
-      display: grid;
-      gap: 22px;
-      align-content: start;
+
+    .shell {
+      min-height: 100vh;
     }
-    .card {
-      background: var(--card);
-      border: 1px solid var(--line);
-      border-radius: var(--radius);
-      box-shadow: var(--shadow);
-      overflow: hidden;
-    }
-    .card h2 {
-      margin: 0;
-      font-size: 18px;
-    }
-    .card-header {
-      padding: 16px 18px;
-      border-bottom: 1px solid var(--line);
+
+    .toolbar {
       display: flex;
       justify-content: space-between;
       align-items: center;
-      gap: 12px;
-      background: #fbfdff;
-    }
-    .card-body {
-      padding: 18px;
-    }
-    .muted { color: var(--muted); }
-    .badge {
-      display: inline-flex;
-      align-items: center;
-      gap: 6px;
-      padding: 5px 10px;
-      border-radius: 999px;
-      font-size: 12px;
-      font-weight: 600;
-      background: var(--accent-2);
-      color: var(--accent);
-      white-space: nowrap;
-    }
-    .form-grid {
-      display: grid;
-      grid-template-columns: repeat(2, minmax(0, 1fr));
-      gap: 14px 16px;
-    }
-    .full { grid-column: 1 / -1; }
-    label {
-      display: flex;
-      align-items: center;
-      gap: 7px;
-      font-size: 13px;
-      font-weight: 700;
-      margin-bottom: 6px;
-      color: #334155;
-    }
-    input, select, .readonly {
-      width: 100%;
-      padding: 11px 12px;
-      border-radius: 10px;
-      border: 1px solid #cfd8e3;
-      background: white;
-      color: var(--text);
-      font-size: 14px;
-    }
-    .readonly {
-      background: #f8fafc;
-    }
-    .field-help {
-      margin-top: 6px;
-      font-size: 12px;
-      color: var(--muted);
-    }
-    .pill-row, .tab-row {
-      display: flex;
-      flex-wrap: wrap;
-      gap: 8px;
-    }
-    .pill, .tab {
-      padding: 10px 12px;
-      border-radius: 10px;
-      border: 1px solid #cfd8e3;
-      background: white;
-      cursor: pointer;
-      font-size: 13px;
-      font-weight: 700;
-      color: #334155;
-      user-select: none;
-    }
-    .pill.active, .tab.active {
-      background: var(--accent-2);
-      border-color: #93c5fd;
-      color: var(--accent);
-    }
-    .quote-grid {
-      display: grid;
-      grid-template-columns: repeat(4, minmax(0, 1fr));
-      gap: 12px;
-    }
-    .quote-box {
-      border: 1px solid var(--line);
-      border-radius: 12px;
-      padding: 12px;
-      background: #f8fafc;
-    }
-    .quote-box .k { font-size: 12px; color: var(--muted); margin-bottom: 3px; display:flex; align-items:center; gap:6px; }
-    .quote-box .v { font-size: 22px; font-weight: 800; }
-    .quote-box .s { font-size: 12px; color: var(--muted); margin-top: 2px; }
-    .mini-table {
-      width: 100%;
-      border-collapse: collapse;
-      font-size: 14px;
-    }
-    .mini-table th, .mini-table td {
+      gap: 16px;
+      padding: 14px 18px;
       border-bottom: 1px solid var(--line);
-      padding: 9px 6px;
-      text-align: left;
-      vertical-align: top;
+      background: rgba(248, 251, 255, 0.96);
+      position: sticky;
+      top: 0;
+      z-index: 10;
+      backdrop-filter: blur(10px);
+      box-shadow: var(--shadow);
     }
-    .mini-table th {
-      font-size: 12px;
-      text-transform: uppercase;
-      letter-spacing: .03em;
-      color: var(--muted);
-      background: #fbfdff;
-    }
-    .mini-table tr:last-child td { border-bottom: none; }
-    .right { text-align: right; }
-    .summary-list {
-      display: grid;
-      gap: 10px;
-    }
-    .summary-item {
-      display: flex;
-      justify-content: space-between;
-      gap: 12px;
-      padding: 10px 0;
-      border-bottom: 1px solid var(--line);
-    }
-    .summary-item:last-child { border-bottom: none; }
-    .summary-item strong { font-size: 15px; }
-    .highlight {
-      padding: 14px;
-      border-radius: 12px;
-      margin-top: 14px;
-      font-size: 14px;
-    }
-    .warn { background: var(--warn-bg); color: var(--warn); border: 1px solid #fcd34d; }
-    .good { background: var(--good-bg); color: var(--good); border: 1px solid #86efac; }
-    .bad { background: var(--bad-bg); color: var(--bad); border: 1px solid #fca5a5; }
-    .legend {
-      display: grid;
-      grid-template-columns: repeat(2, minmax(0, 1fr));
-      gap: 10px 14px;
-      font-size: 13px;
-    }
-    .legend div {
-      background: #f8fafc;
-      border: 1px solid var(--line);
-      border-radius: 10px;
-      padding: 10px 12px;
-    }
-    .footer-note {
-      margin-top: 18px;
-      font-size: 12px;
-      color: var(--muted);
-    }
-    .footer-links {
-      margin-top: 10px;
+
+    .tabs {
       display: flex;
       flex-wrap: wrap;
       gap: 10px;
-      font-size: 13px;
-    }
-    .footer-links a {
-      color: var(--accent);
-      text-decoration: none;
-      font-weight: 600;
-    }
-    .footer-links a:hover { text-decoration: underline; }
-
-    .info-btn {
-      display: inline-flex;
-      align-items: center;
-      justify-content: center;
-      width: 18px;
-      height: 18px;
-      min-width: 18px;
-      border-radius: 999px;
-      border: 1px solid #93c5fd;
-      background: var(--accent-2);
-      color: var(--accent);
-      font-size: 11px;
-      font-weight: 800;
-      cursor: pointer;
-      line-height: 1;
-      padding: 0;
-    }
-    .info-btn:hover,
-    .info-btn:focus-visible {
-      outline: none;
-      border-color: var(--accent);
-      box-shadow: 0 0 0 3px rgba(29, 78, 216, 0.12);
     }
 
-    .info-panel {
-      display: none;
-      margin-top: 8px;
-      padding: 10px 12px;
-      border-radius: 10px;
-      border: 1px solid #bfdbfe;
-      background: #f8fbff;
-      color: #1e3a8a;
-      font-size: 12px;
-    }
-    .info-panel.open { display: block; }
-
-    footer.site-footer {
-      margin-top: 26px;
+    .tab-btn {
+      border: 1px solid #bfd2ee;
       background: #fff;
-      border: 1px solid var(--line);
-      border-radius: var(--radius);
-      box-shadow: var(--shadow);
-      padding: 18px;
-      font-size: 13px;
-    }
-    footer.site-footer h2 {
-      font-size: 17px;
-      margin: 0 0 10px;
-    }
-    footer.site-footer p {
-      margin: 8px 0;
-    }
-    footer.site-footer .small {
-      color: var(--muted);
-      font-size: 12px;
+      color: #334155;
+      padding: 11px 14px;
+      border-radius: 999px;
+      font: inherit;
+      font-weight: 700;
+      cursor: pointer;
+      transition: 160ms ease;
     }
 
-    @media (max-width: 1050px) {
-      .grid { grid-template-columns: 1fr; }
+    .tab-btn:hover {
+      border-color: #93c5fd;
+      transform: translateY(-1px);
     }
-    @media (max-width: 700px) {
-      .form-grid, .quote-grid, .legend { grid-template-columns: 1fr; }
-      .wrap { padding: 14px; }
-      header { padding: 20px; }
-      header h1 { font-size: 24px; }
-      .card-header { align-items: flex-start; }
+
+    .tab-btn.active {
+      background: var(--accent);
+      border-color: var(--accent);
+      color: #fff;
+      box-shadow: 0 10px 22px rgba(29, 78, 216, 0.22);
+    }
+
+    .frame-stage {
+      min-height: calc(100vh - 67px);
+    }
+
+    .frame-wrap {
+      display: none;
+      min-height: calc(100vh - 67px);
+    }
+
+    .frame-wrap.active {
+      display: block;
+    }
+
+    iframe {
+      display: block;
+      width: 100%;
+      min-height: calc(100vh - 67px);
+      border: 0;
+      background: #fff;
+    }
+
+    @media (max-width: 900px) {
+      .toolbar {
+        flex-direction: column;
+        align-items: stretch;
+        padding: 12px 14px;
+      }
+
     }
   </style>
 </head>
 <body>
   <div class="wrap">
-    <header>
-      <h1>Interaktive Ordermaske für den Geldanlagekurs</h1>
-      <p>
-        Diese Seite simuliert die wichtigsten Eingaben und Anzeigen einer Wertpapierorder:
-        ISIN, Börsenplatz, Geld-/Briefkurs, Ordertyp, Stückzahl, Gültigkeit, Ausführungsbedingung
-        und geschätzte Kosten. Sie ist für didaktische Zwecke gedacht und ersetzt kein reales Depot.
-      </p>
-    </header>
-
-    <div class="grid">
-      <div class="col">
-        <section class="card">
-          <div class="card-header">
-            <h2>1. Order eingeben</h2>
-            <span class="badge">Kauf oder Verkauf – Demo</span>
-          </div>
-          <div class="card-body">
-            <div class="form-grid">
-              <div class="full">
-                <label for="isin">ISIN / WKN / Wertpapiername
-                  <button class="info-btn" type="button" data-info-target="info-isin" aria-expanded="false" aria-controls="info-isin">i</button>
-                </label>
-                <input id="isin" value="IE00B4L5Y983" />
-                <div id="info-isin" class="info-panel">Hier kannst du eine ISIN eingeben. In dieser Demo reagieren Name, Kürzel und Kursdaten mit Beispielwerten.</div>
-                <div class="field-help">Beispiel: ETF-ISIN eingeben. Der Kursbereich rechts reagiert mit Demo-Daten.</div>
-              </div>
-
-              <div>
-                <label for="name">Wertpapier</label>
-                <div id="name" class="readonly">iShares Core MSCI World UCITS ETF USD (Acc)</div>
-              </div>
-              <div>
-                <label for="ticker">Ticker / Kürzel</label>
-                <div id="ticker" class="readonly">EUNL</div>
-              </div>
-
-              <div class="full">
-                <label>Transaktion
-                  <button class="info-btn" type="button" data-info-target="info-side" aria-expanded="false" aria-controls="info-side">i</button>
-                </label>
-                <div class="pill-row" id="sidePills">
-                  <button class="pill active" type="button" data-side="buy">Kauf</button>
-                  <button class="pill" type="button" data-side="sell">Verkauf</button>
-                </div>
-                <div id="info-side" class="info-panel">Mit Kauf erwirbst du Stücke. Mit Verkauf veräußerst du vorhandene Stücke. Je nach Richtung ändern sich Geld- und Briefkurs als relevante Seite.</div>
-              </div>
-
-              <div>
-                <label for="exchange">Börsenplatz
-                  <button class="info-btn" type="button" data-info-target="info-exchange" aria-expanded="false" aria-controls="info-exchange">i</button>
-                </label>
-                <select id="exchange">
-                  <option value="gettex">gettex</option>
-                  <option value="tradegate">Tradegate</option>
-                  <option value="xetra">Xetra</option>
-                  <option value="lsx">LS Exchange</option>
-                  <option value="quotrix">Quotrix</option>
-                </select>
-                <div id="info-exchange" class="info-panel">Der Börsenplatz beeinflusst unter anderem Geld-/Briefkurse, Handelszeiten und teils auch Gebühren.</div>
-              </div>
-
-              <div>
-                <label for="quantity">Stückzahl
-                  <button class="info-btn" type="button" data-info-target="info-qty" aria-expanded="false" aria-controls="info-qty">i</button>
-                </label>
-                <input id="quantity" type="number" min="1" step="1" value="10" />
-                <div id="info-qty" class="info-panel">Hier legst du fest, wie viele Anteile du kaufen oder verkaufen möchtest. Das beeinflusst Ordervolumen und Kosten.</div>
-              </div>
-
-              <div class="full">
-                <label>Ordertyp
-                  <button class="info-btn" type="button" data-info-target="info-ordertype" aria-expanded="false" aria-controls="info-ordertype">i</button>
-                </label>
-                <div class="tab-row" id="orderTypeTabs">
-                  <button class="tab active" type="button" data-type="market">Market / Bestens-Billigst</button>
-                  <button class="tab" type="button" data-type="limit">Limit</button>
-                  <button class="tab" type="button" data-type="stop">Stop-Market</button>
-                  <button class="tab" type="button" data-type="stopLimit">Stop-Limit</button>
-                </div>
-                <div id="info-ordertype" class="info-panel">Market bedeutet: Ausführung zum nächstbesten verfügbaren Preis (in Deutschland oft „Bestens“ beim Kauf und „Billigst“ beim Verkauf). Limit begrenzt den Preis. Bei Stop-Market legt der Stop fest, wann die Order ausgelöst wird; danach wird sie als Market-Order ausgeführt. Bei Stop-Limit legt der Stop ebenfalls nur den Auslöser fest; danach wird aber eine Limit-Order eingestellt, die nur zu deinem Limit oder besser ausgeführt wird.</div>
-              </div>
-
-              <div id="limitWrap" style="display:none;">
-                <label for="limitPrice">Limitpreis (€)
-                  <button class="info-btn" type="button" data-info-target="info-limit" aria-expanded="false" aria-controls="info-limit">i</button>
-                </label>
-                <input id="limitPrice" type="number" step="0.01" value="102.40" />
-                <div id="info-limit" class="info-panel">Bei einem Kauf ist das dein maximaler Preis. Bei einem Verkauf ist es dein minimal akzeptierter Preis.</div>
-                <div class="field-help">Maximaler Kaufpreis bzw. minimaler Verkaufspreis.</div>
-              </div>
-
-              <div id="stopWrap" style="display:none;">
-                <label for="stopPrice">Stop-Kurs (€)
-                  <button class="info-btn" type="button" data-info-target="info-stop" aria-expanded="false" aria-controls="info-stop">i</button>
-                </label>
-                <input id="stopPrice" type="number" step="0.01" value="101.80" />
-                <div id="info-stop" class="info-panel">Der Stop-Kurs ist nur der Auslöser. Erst wenn dieser erreicht wird, wird die Order aktiviert. Bei einer Stop-Market-Order folgt dann sofort eine Ausführung zum nächsten verfügbaren Marktpreis. Bei einer Stop-Limit-Order wird danach eine Limit-Order ins Orderbuch gestellt. Wichtig: Der Stop bestimmt also nicht den Ausführungspreis, sondern nur den Zeitpunkt der Aktivierung.</div>
-                <div class="field-help">Bei Erreichen wird die Order ausgelöst.</div>
-              </div>
-
-              <div>
-                <label for="validity">Gültigkeit
-                  <button class="info-btn" type="button" data-info-target="info-validity" aria-expanded="false" aria-controls="info-validity">i</button>
-                </label>
-                <select id="validity">
-                  <option value="day">Tagesgültig</option>
-                  <option value="gtc">Gültig bis Widerruf (GTC)</option>
-                  <option value="date">Gültig bis Datum</option>
-                </select>
-                <div id="info-validity" class="info-panel">Hier legst du fest, wie lange deine Order aktiv bleibt, falls sie nicht sofort ausgeführt wird.</div>
-              </div>
-
-              <div id="validUntilWrap" style="display:none;">
-                <label for="validUntil">Gültig bis</label>
-                <input id="validUntil" type="date" />
-              </div>
-
-              <div>
-                <label for="feeModel">Gebührenmodell
-                  <button class="info-btn" type="button" data-info-target="info-fees" aria-expanded="false" aria-controls="info-fees">i</button>
-                </label>
-                <select id="feeModel">
-                  <option value="neo">Pauschalmodell: 1,00 € je Order</option>
-                  <option value="bank">Direktbank: 4,90 € + 0,25 %</option>
-                  <option value="flat">Flat Fee: 5,90 €</option>
-                </select>
-                <div id="info-fees" class="info-panel">Die Gebührenmodelle hier sind vereinfachte Demo-Beispiele. In der Praxis hängen Kosten vom Broker, Börsenplatz und Ordervolumen ab.</div>
-              </div>
-
-              <div>
-                <label for="executionCondition">Ausführungsbedingung
-                  <button class="info-btn" type="button" data-info-target="info-execcond" aria-expanded="false" aria-controls="info-execcond">i</button>
-                </label>
-                <select id="executionCondition">
-                  <option value="partial">Teilausführung möglich</option>
-                  <option value="fullOnly">Nur vollständige Ausführung</option>
-                </select>
-                <div id="info-execcond" class="info-panel">Teilausführung bedeutet, dass nur ein Teil der Stückzahl ausgeführt werden kann. Bei vollständiger Ausführung muss die gesamte Stückzahl auf einmal handelbar sein.</div>
-              </div>
-            </div>
-          </div>
-        </section>
-
-        <section class="card">
-          <div class="card-header">
-            <h2>2. Marktumfeld / Kursstellung</h2>
-            <span class="badge">Geld / Brief / Spread</span>
-          </div>
-          <div class="card-body">
-            <div class="quote-grid">
-              <div class="quote-box">
-                <div class="k">Geldkurs (Bid)
-                  <button class="info-btn" type="button" data-info-target="info-bid" aria-expanded="false" aria-controls="info-bid">i</button>
-                </div>
-                <div class="v" id="bidOut">102,31 €</div>
-                <div class="s">höchstes Kaufgebot</div>
-                <div id="info-bid" class="info-panel">Der Geldkurs ist der höchste Preis, den jemand aktuell zu zahlen bereit ist.</div>
-              </div>
-              <div class="quote-box">
-                <div class="k">Briefkurs (Ask)
-                  <button class="info-btn" type="button" data-info-target="info-ask" aria-expanded="false" aria-controls="info-ask">i</button>
-                </div>
-                <div class="v" id="askOut">102,36 €</div>
-                <div class="s">günstigstes Verkaufsangebot</div>
-                <div id="info-ask" class="info-panel">Der Briefkurs ist der niedrigste Preis, zu dem aktuell jemand verkaufen möchte.</div>
-              </div>
-              <div class="quote-box">
-                <div class="k">Spread
-                  <button class="info-btn" type="button" data-info-target="info-spread" aria-expanded="false" aria-controls="info-spread">i</button>
-                </div>
-                <div class="v" id="spreadOut">0,05 €</div>
-                <div class="s" id="spreadPctOut">0,049 %</div>
-                <div id="info-spread" class="info-panel">Der Spread ist die Differenz zwischen Geld- und Briefkurs. Er ist ein wichtiger indirekter Kostenfaktor.</div>
-              </div>
-              <div class="quote-box">
-                <div class="k">Letzter Kurs
-                  <button class="info-btn" type="button" data-info-target="info-last" aria-expanded="false" aria-controls="info-last">i</button>
-                </div>
-                <div class="v" id="lastOut">102,34 €</div>
-                <div class="s">zuletzt gehandelter Preis</div>
-                <div id="info-last" class="info-panel">Das ist der zuletzt festgestellte gehandelte Preis. Er muss nicht dem aktuellen Geld- oder Briefkurs entsprechen.</div>
-              </div>
-            </div>
-
-            <div style="margin-top:16px; overflow:auto;">
-              <table class="mini-table">
-                <thead>
-                  <tr>
-                    <th>Platz</th>
-                    <th>Geld</th>
-                    <th>Brief</th>
-                    <th>Spread</th>
-                    <th>Handelszeit</th>
-                  </tr>
-                </thead>
-                <tbody id="exchangeTableBody"></tbody>
-              </table>
-            </div>
-          </div>
-        </section>
+    <section class="shell">
+      <div class="toolbar">
+        <div class="tabs" role="tablist" aria-label="Tool-Auswahl">
+          <button class="tab-btn active" type="button" data-target="frame-order" role="tab" aria-selected="true">Ordermaske</button>
+          <button class="tab-btn" type="button" data-target="frame-vorsorge" role="tab" aria-selected="false">Altersvorsorge-Rechner</button>
+        </div>
       </div>
 
-      <div class="col">
-        <section class="card">
-          <div class="card-header">
-            <h2>3. Voraussichtliche Ausführung</h2>
-            <span class="badge">didaktische Vorschau</span>
-          </div>
-          <div class="card-body">
-            <div class="summary-list">
-              <div class="summary-item"><span>Ordertyp</span><strong id="summaryType">Market</strong></div>
-              <div class="summary-item"><span>Börsenplatz</span><strong id="summaryExchange">gettex</strong></div>
-              <div class="summary-item"><span>Stückzahl</span><strong id="summaryQty">10</strong></div>
-              <div class="summary-item"><span>geschätzter Ausführungskurs</span><strong id="execPrice">102,36 €</strong></div>
-              <div class="summary-item"><span>Ordervolumen</span><strong id="volumeOut">1.023,60 €</strong></div>
-              <div class="summary-item"><span>geschätzte Gebühren</span><strong id="feesOut">1,00 €</strong></div>
-              <div class="summary-item"><span>Gesamtbetrag / Nettoerlös</span><strong id="totalOut">1.024,60 €</strong></div>
-            </div>
-
-            <div id="statusBox" class="highlight good">
-              Diese Demo-Order wäre als <strong>Market-Kauf</strong> voraussichtlich sofort zum aktuellen <strong>Briefkurs</strong> ausführbar.
-            </div>
-          </div>
+      <div class="frame-stage">
+        <section class="frame-wrap active" id="frame-order">
+          <iframe id="iframe-order" src="ordermaske.html" title="Ordermaske Geldanlagekurs" loading="lazy"></iframe>
         </section>
 
-        <section class="card">
-          <div class="card-header">
-            <h2>4. Didaktische Erklärung der Felder</h2>
-            <span class="badge">für den Kurs</span>
-          </div>
-          <div class="card-body">
-            <div class="legend">
-              <div><strong>ISIN</strong><br><span class="muted">Eindeutige Kennnummer des Wertpapiers.</span></div>
-              <div><strong>Geldkurs</strong><br><span class="muted">Preis, zu dem aktuell jemand kaufen will.</span></div>
-              <div><strong>Briefkurs</strong><br><span class="muted">Preis, zu dem aktuell jemand verkaufen will.</span></div>
-              <div><strong>Spread</strong><br><span class="muted">Differenz zwischen Geld und Brief.</span></div>
-              <div><strong>Market-Order</strong><br><span class="muted">Sofortige Ausführung. Kauf = „Bestens“, Verkauf = „Billigst“.</span></div>
-              <div><strong>Limit-Order</strong><br><span class="muted">Nur bis zu einem festgelegten Preis.</span></div>
-              <div><strong>Stop-Market</strong><br><span class="muted">Der Stop löst die Order erst aus. Danach wird sie als Market-Order ausgeführt. Hohe Ausführungschance, aber der tatsächliche Preis kann abweichen.</span></div>
-              <div><strong>Stop-Limit</strong><br><span class="muted">Der Stop löst nur aus. Danach wird eine Limit-Order eingestellt. Der Preis ist begrenzt, aber die Ausführung ist nicht sicher.</span></div>
-              <div><strong>Gültigkeit</strong><br><span class="muted">Wie lange die Order aktiv bleiben soll.</span></div>
-              <div><strong>Börsenplatz</strong><br><span class="muted">Dort wird die Order ausgeführt; Preise können leicht variieren.</span></div>
-              <div><strong>Kosten</strong><br><span class="muted">Broker-Gebühr, Handelsplatzkosten und indirekt auch Spread.</span></div>
-            </div>
-            <div class="footer-note">
-              Tipp für deinen Kurs: Lass die Teilnehmenden erst vermuten, was Geld- und Briefkurs bedeuten, bevor du die Auflösung zeigst.
-            </div>
-            <div class="footer-links">
-              <a href="#impressum">Zum Impressum</a>
-              <a href="#datenschutz">Zum Datenschutz</a>
-            </div>
-          </div>
-        </section>
-
-        <section class="card">
-          <div class="card-header">
-            <h2>5. Typische Rückfragen</h2>
-            <span class="badge">Aha-Momente</span>
-          </div>
-          <div class="card-body">
-            <table class="mini-table">
-              <tbody>
-                <tr><td><strong>Warum zahle ich beim Kauf den höheren Kurs?</strong></td><td>Weil du zum aktuellen Verkaufsangebot kaufst: dem Briefkurs.</td></tr>
-                <tr><td><strong>Warum unterscheiden sich Börsenplätze?</strong></td><td>Liquidität, Handelszeiten und Gebühren können leicht verschieden sein.</td></tr>
-                <tr><td><strong>Was ist bei Market riskant?</strong></td><td>Du kennst den exakten Ausführungspreis vorher nicht.</td></tr>
-                <tr><td><strong>Was schützt ein Limit?</strong></td><td>Beim Kauf: nicht teurer als dein Maximalpreis. Beim Verkauf: nicht billiger als dein Mindestpreis.</td></tr>
-                <tr><td><strong>Worin unterscheiden sich Stop-Market und Stop-Limit?</strong></td><td>Stop-Market: Auslösung durch Stop, danach sofortige Market-Order. Stop-Limit: Auslösung durch Stop, danach Limit-Order. Also Preisrisiko versus Ausführungsrisiko.</td></tr>
-              </tbody>
-            </table>
-          </div>
+        <section class="frame-wrap" id="frame-vorsorge">
+          <iframe id="iframe-vorsorge" src="altersvorsorge_rechner.html" title="Altersvorsorgedepot vs. ETF" loading="lazy"></iframe>
         </section>
       </div>
-    </div>
-
-    <footer class="site-footer" id="impressum">
-      <h2>Impressum und Hinweise</h2>
-      <p><strong>Verantwortlich für den Inhalt:</strong><br>
-      Hans Glück<br>
-      Katholisches Kreisbildungswerk Traunstein e. V.<br>
-      Vonfichtstraße 1<br>
-      83278 Traunstein</p>
-
-      <p><strong>Zweck dieser Seite:</strong><br>
-      Diese Simulation dient ausschließlich Bildungs- und Demonstrationszwecken im Rahmen eines Geldanlagekurses.
-      Sie stellt keine Anlageberatung, keine Anlagevermittlung und keine Aufforderung zum Kauf oder Verkauf von Wertpapieren dar.</p>
-
-      <p class="small">Ergänze vor der Veröffentlichung am besten noch eine Kontaktmöglichkeit, falls du die Seite öffentlich betreibst.</p>
-
-      <p id="datenschutz"><strong>Datenschutzhinweis:</strong><br>
-      Diese Seite kann über GitHub Pages oder einen vergleichbaren Hosting-Dienst bereitgestellt werden.
-      Beim Aufruf können durch den Hosting-Anbieter technisch notwendige Daten wie IP-Adresse, Zeitpunkt des Abrufs
-      und Browserinformationen verarbeitet werden. Diese Demo selbst verwendet keine Cookies, keine Formulare
-      und kein eingebautes Tracking.</p>
-
-      <p class="small"><strong>Inhaltliche Grundlage:</strong> Eigene didaktische Darstellung auf Basis gebräuchlicher Orderbegriffe wie ISIN, Geldkurs, Briefkurs, Spread, Market-, Limit-, Stop-Market- und Stop-Limit-Order.</p>
-    </footer>
+    </section>
   </div>
 
   <script>
-    const securities = {
-      'IE00B4L5Y983': {
-        name: 'iShares Core MSCI World UCITS ETF USD (Acc)',
-        ticker: 'EUNL',
-        base: { bid: 102.31, ask: 102.36, last: 102.34 }
-      },
-      'IE00BK5BQT80': {
-        name: 'Vanguard FTSE All-World UCITS ETF (USD) Accumulating',
-        ticker: 'VWCE',
-        base: { bid: 118.62, ask: 118.70, last: 118.66 }
-      },
-      'LU1931974692': {
-        name: 'Amundi Prime Global UCITS ETF DR',
-        ticker: 'PRIW',
-        base: { bid: 34.22, ask: 34.26, last: 34.24 }
-      }
-    };
+    const tabs = Array.from(document.querySelectorAll('.tab-btn'));
+    const frames = Array.from(document.querySelectorAll('.frame-wrap'));
+    const iframes = Array.from(document.querySelectorAll('iframe'));
 
-    const exchangeAdjustments = {
-      gettex:    { bid: -0.01, ask: 0.00, time: '08:00–22:00' },
-      tradegate: { bid:  0.00, ask: 0.01, time: '08:00–22:00' },
-      xetra:     { bid:  0.01, ask: 0.00, time: '09:00–17:30' },
-      lsx:       { bid: -0.02, ask: 0.02, time: '07:30–23:00' },
-      quotrix:   { bid: -0.01, ask: 0.01, time: '07:30–23:00' }
-    };
-
-    const el = id => document.getElementById(id);
-    const eur = n => new Intl.NumberFormat('de-DE', { style: 'currency', currency: 'EUR' }).format(n);
-    const pct = n => new Intl.NumberFormat('de-DE', { minimumFractionDigits: 3, maximumFractionDigits: 3 }).format(n) + ' %';
-
-    let side = 'buy';
-    let orderType = 'market';
-
-    function getSecurity() {
-      const raw = el('isin').value.trim().toUpperCase();
-      return securities[raw] || securities['IE00B4L5Y983'];
-    }
-
-    function currentQuotesFor(exchangeKey) {
-      const sec = getSecurity();
-      const adj = exchangeAdjustments[exchangeKey];
-      return {
-        bid: +(sec.base.bid + adj.bid).toFixed(2),
-        ask: +(sec.base.ask + adj.ask).toFixed(2),
-        last: +(sec.base.last + (adj.bid + adj.ask) / 2).toFixed(2),
-        time: adj.time
-      };
-    }
-
-    function updateSecurity() {
-      const raw = el('isin').value.trim().toUpperCase();
-      const sec = securities[raw] || securities['IE00B4L5Y983'];
-      el('name').textContent = sec.name;
-      el('ticker').textContent = sec.ticker;
-
-      const defaultLimit = sec.base.ask + 0.04;
-      const defaultStop = sec.base.bid - 0.05;
-      el('limitPrice').value = defaultLimit.toFixed(2);
-      el('stopPrice').value = defaultStop.toFixed(2);
-    }
-
-    function renderExchangeTable() {
-      const tbody = el('exchangeTableBody');
-      tbody.innerHTML = '';
-      Object.keys(exchangeAdjustments).forEach(key => {
-        const q = currentQuotesFor(key);
-        const spread = +(q.ask - q.bid).toFixed(2);
-        const tr = document.createElement('tr');
-        tr.innerHTML = `
-          <td>${key}</td>
-          <td>${eur(q.bid)}</td>
-          <td>${eur(q.ask)}</td>
-          <td>${eur(spread)}</td>
-          <td>${q.time}</td>
-        `;
-        tbody.appendChild(tr);
+    function setActive(targetId) {
+      tabs.forEach((tab) => {
+        const active = tab.dataset.target === targetId;
+        tab.classList.toggle('active', active);
+        tab.setAttribute('aria-selected', String(active));
       });
-    }
 
-    function feeFor(orderVolume) {
-      const m = el('feeModel').value;
-      if (m === 'neo') return 1.00;
-      if (m === 'flat') return 5.90;
-      return 4.90 + orderVolume * 0.0025;
-    }
+      frames.forEach((frame) => {
+        frame.classList.toggle('active', frame.id === targetId);
+      });
 
-    function updateConditionalFields() {
-      el('limitWrap').style.display = (orderType === 'limit' || orderType === 'stopLimit') ? 'block' : 'none';
-      el('stopWrap').style.display = (orderType === 'stop' || orderType === 'stopLimit') ? 'block' : 'none';
-      el('validUntilWrap').style.display = el('validity').value === 'date' ? 'block' : 'none';
-    }
-
-    function updateSummary() {
-      updateSecurity();
-      renderExchangeTable();
-
-      const exchange = el('exchange').value;
-      const qty = Math.max(1, Number(el('quantity').value) || 1);
-      const q = currentQuotesFor(exchange);
-      const spread = +(q.ask - q.bid).toFixed(2);
-      const spreadPct = spread / q.last * 100;
-
-      el('bidOut').textContent = eur(q.bid);
-      el('askOut').textContent = eur(q.ask);
-      el('spreadOut').textContent = eur(spread);
-      el('spreadPctOut').textContent = pct(spreadPct);
-      el('lastOut').textContent = eur(q.last);
-
-      let execPrice = side === 'buy' ? q.ask : q.bid;
-      let message = '';
-      let statusClass = 'good';
-      const limit = Number(el('limitPrice').value) || 0;
-      const stop = Number(el('stopPrice').value) || 0;
-
-      if (orderType === 'market') {
-        message = side === 'buy'
-          ? 'Diese Demo-Order wäre als <strong>Market-Kauf</strong> voraussichtlich sofort zum aktuellen <strong>Briefkurs</strong> ausführbar.'
-          : 'Diese Demo-Order wäre als <strong>Market-Verkauf</strong> voraussichtlich sofort zum aktuellen <strong>Geldkurs</strong> ausführbar.';
+      const activeFrame = document.querySelector(`#${targetId} iframe`);
+      if (activeFrame) {
+        syncFrameHeight(activeFrame);
       }
-      if (orderType === 'limit') {
-        execPrice = limit;
-        const executable = side === 'buy' ? limit >= q.ask : limit <= q.bid;
-        if (executable) {
-          statusClass = 'good';
-          execPrice = side === 'buy' ? Math.min(limit, q.ask) : Math.max(limit, q.bid);
-          message = 'Die <strong>Limit-Order</strong> wäre nach diesen Demo-Daten sofort ausführbar, weil dein Limit bereits marktgerecht ist.';
-        } else {
-          statusClass = 'warn';
-          message = 'Die <strong>Limit-Order</strong> würde zunächst offen bleiben, bis der Markt dein Limit erreicht.';
+    }
+
+    function syncFrameHeight(iframe) {
+      try {
+        const doc = iframe.contentDocument || iframe.contentWindow.document;
+        if (!doc) return;
+        const height = Math.max(
+          doc.body ? doc.body.scrollHeight : 0,
+          doc.documentElement ? doc.documentElement.scrollHeight : 0
+        );
+        if (height > 0) {
+          iframe.style.height = `${height + 8}px`;
         }
+      } catch (error) {
+        // Same-origin is expected on GitHub Pages for these local files.
       }
-      if (orderType === 'stop') {
-        statusClass = 'warn';
-        execPrice = side === 'buy' ? Math.max(stop, q.ask) : Math.min(stop, q.bid);
-        message = 'Die <strong>Stop-Market-Order</strong> wird erst aktiv, wenn der Stop-Kurs erreicht wird. Der Stop ist nur der Auslöser; danach erfolgt eine Ausführung als Market-Order zum nächsten verfügbaren Preis.';
-      }
-      if (orderType === 'stopLimit') {
-        statusClass = 'warn';
-        execPrice = limit;
-        message = 'Die <strong>Stop-Limit-Order</strong> wird erst beim Stop-Kurs aktiviert. Danach wird eine Limit-Order eingestellt, die nur zu deinem Limit oder besser ausgeführt wird. Sie kann also auch unausgeführt bleiben.';
-      }
-
-      const volume = execPrice * qty;
-      const fees = feeFor(volume);
-      const total = side === 'buy' ? volume + fees : volume - fees;
-
-      el('summaryType').textContent = document.querySelector('#orderTypeTabs .tab.active').textContent;
-      el('summaryExchange').textContent = exchange;
-      el('summaryQty').textContent = qty.toString();
-      el('execPrice').textContent = eur(execPrice);
-      el('volumeOut').textContent = eur(volume);
-      el('feesOut').textContent = eur(fees);
-      el('totalOut').textContent = eur(total);
-
-      const statusBox = el('statusBox');
-      statusBox.className = 'highlight ' + statusClass;
-      statusBox.innerHTML = message;
     }
 
-    document.querySelectorAll('#sidePills .pill').forEach(btn => {
-      btn.addEventListener('click', () => {
-        document.querySelectorAll('#sidePills .pill').forEach(b => b.classList.remove('active'));
-        btn.classList.add('active');
-        side = btn.dataset.side;
-        updateSummary();
+    tabs.forEach((tab) => {
+      tab.addEventListener('click', () => setActive(tab.dataset.target));
+    });
+
+    iframes.forEach((iframe) => {
+      iframe.addEventListener('load', () => {
+        syncFrameHeight(iframe);
+        window.setTimeout(() => syncFrameHeight(iframe), 250);
+        window.setTimeout(() => syncFrameHeight(iframe), 1000);
       });
     });
 
-    document.querySelectorAll('#orderTypeTabs .tab').forEach(btn => {
-      btn.addEventListener('click', () => {
-        document.querySelectorAll('#orderTypeTabs .tab').forEach(b => b.classList.remove('active'));
-        btn.classList.add('active');
-        orderType = btn.dataset.type;
-        updateConditionalFields();
-        updateSummary();
-      });
+    window.addEventListener('resize', () => {
+      const activeFrame = document.querySelector('.frame-wrap.active iframe');
+      if (activeFrame) {
+        syncFrameHeight(activeFrame);
+      }
     });
-
-    ['isin','exchange','quantity','limitPrice','stopPrice','validity','feeModel','executionCondition','validUntil'].forEach(id => {
-      el(id).addEventListener('input', () => {
-        updateConditionalFields();
-        updateSummary();
-      });
-      el(id).addEventListener('change', () => {
-        updateConditionalFields();
-        updateSummary();
-      });
-    });
-
-    document.querySelectorAll('.info-btn').forEach(btn => {
-      btn.addEventListener('click', () => {
-        const target = el(btn.dataset.infoTarget);
-        const willOpen = !target.classList.contains('open');
-        target.classList.toggle('open');
-        btn.setAttribute('aria-expanded', willOpen ? 'true' : 'false');
-      });
-    });
-
-    const today = new Date();
-    today.setDate(today.getDate() + 14);
-    el('validUntil').value = today.toISOString().slice(0, 10);
-
-    updateConditionalFields();
-    updateSummary();
   </script>
 </body>
 </html>
