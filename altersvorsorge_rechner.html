@@ -314,7 +314,7 @@
               <input id="child5" type="number" min="0" step="1" value="0" aria-label="Kind 5">
               <input id="child6" type="number" min="0" step="1" value="0" aria-label="Kind 6">
             </div>
-            <div id="info-children" class="info-panel">Für jedes Kind mit verbleibendem Kindergeldanspruch berücksichtigt der Rechner 300 € Förderung pro Jahr. Eine Förderung erfolgt, sobald im jeweiligen Jahr mindestens 300 € selbst eingezahlt werden. Dann werden die 300 € je berücksichtigungsfähigem Kind angesetzt.</div>
+            <div id="info-children" class="info-panel">Für jedes Kind mit verbleibendem Kindergeldanspruch berücksichtigt der Rechner eine Kinderförderung von 100 % auf den eigenen Jahresbeitrag bis maximal 300 € pro Kind. Das heißt: 100 € Eigenbeitrag im Jahr ergeben 100 € Kinderförderung je Kind, 300 € Eigenbeitrag oder mehr ergeben 300 € je Kind.</div>
             <div class="hint">0 bedeutet: kein weiteres Kind bzw. keine restliche Kindergeldzeit.</div>
           </div>
         </div>
@@ -402,7 +402,7 @@
     function annualAllowance(annualContribution, activeChildren) {
       const part1 = Math.min(annualContribution, 360) * 0.5;
       const part2 = Math.max(Math.min(annualContribution - 360, 1440), 0) * 0.25;
-      const childPart = annualContribution >= 300 ? 300 * activeChildren : 0;
+      const childPart = Math.min(annualContribution, 300) * activeChildren;
       return part1 + part2 + childPart;
     }
 
