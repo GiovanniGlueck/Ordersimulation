@@ -70,6 +70,49 @@
       font-size: 0.93rem;
       font-weight: 600;
     }
+    .label-row {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      flex-wrap: wrap;
+    }
+    .info-btn {
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      width: 18px;
+      height: 18px;
+      min-width: 18px;
+      border-radius: 999px;
+      border: 1px solid #93c5fd;
+      background: #eff6ff;
+      color: var(--accent);
+      font-size: 11px;
+      font-weight: 800;
+      cursor: pointer;
+      line-height: 1;
+      padding: 0;
+    }
+    .info-btn:hover,
+    .info-btn:focus-visible {
+      outline: none;
+      border-color: var(--accent);
+      box-shadow: 0 0 0 3px rgba(29, 78, 216, 0.12);
+    }
+    .info-panel {
+      display: none;
+      margin-top: 8px;
+      padding: 10px 12px;
+      border-radius: 10px;
+      border: 1px solid #bfdbfe;
+      background: #f8fbff;
+      color: #1e3a8a;
+      font-size: 0.82rem;
+      line-height: 1.4;
+    }
+    .info-panel.open {
+      display: block;
+    }
     .hint {
       font-size: 0.8rem;
       color: var(--muted);
@@ -214,8 +257,12 @@
         <h2 class="section-title">Eingaben</h2>
         <div class="fields">
           <div class="field">
-            <label for="monthly">Beitrag im Monat (€)</label>
+            <div class="label-row">
+              <label for="monthly">Beitrag im Monat (€)</label>
+              <button class="info-btn" type="button" data-info-target="info-monthly" aria-expanded="false" aria-controls="info-monthly">i</button>
+            </div>
             <input id="monthly" type="number" min="0" max="570" step="10" value="150">
+            <div id="info-monthly" class="info-panel">Die Förderung folgt hier dieser Logik: Bis 30 € monatlich werden 50 % gefördert, also bis zu 15 € pro Monat. Von den weiteren Beiträgen werden bis zu 120 € monatlich noch 25 % gefördert, also bis zu 30 € pro Monat. Zusammen ergibt das aus dem Eigenbeitrag maximal 45 € Förderung pro Monat beziehungsweise 540 € pro Jahr. Hinzu kommen gegebenenfalls 300 € Förderung pro Kind und Jahr.</div>
           </div>
           <div class="field">
             <label for="years">Zeit bis zum Rentenbeginn (Jahre)</label>
@@ -251,7 +298,10 @@
           </div>
 
           <div class="field">
-            <label>Kinder: restliche Kindergeldzeit (Jahre)</label>
+            <div class="label-row">
+              <label>Kinder: restliche Kindergeldzeit (Jahre)</label>
+              <button class="info-btn" type="button" data-info-target="info-children" aria-expanded="false" aria-controls="info-children">i</button>
+            </div>
             <div class="twocol">
               <input id="child1" type="number" min="0" step="1" value="5" aria-label="Kind 1">
               <input id="child2" type="number" min="0" step="1" value="7" aria-label="Kind 2">
@@ -264,6 +314,7 @@
               <input id="child5" type="number" min="0" step="1" value="0" aria-label="Kind 5">
               <input id="child6" type="number" min="0" step="1" value="0" aria-label="Kind 6">
             </div>
+            <div id="info-children" class="info-panel">Für jedes Kind mit verbleibendem Kindergeldanspruch berücksichtigt der Rechner 300 € Förderung pro Jahr. Eine Förderung erfolgt, sobald im jeweiligen Jahr mindestens 300 € selbst eingezahlt werden. Dann werden die 300 € je berücksichtigungsfähigem Kind angesetzt.</div>
             <div class="hint">0 bedeutet: kein weiteres Kind bzw. keine restliche Kindergeldzeit.</div>
           </div>
         </div>
@@ -331,6 +382,14 @@
   <script>
     const ids = ["monthly", "years", "costDepot", "costEtf", "return", "basiszins", "taxNow", "taxRet", "child1", "child2", "child3", "child4", "child5", "child6"];
     ids.forEach(id => document.getElementById(id).addEventListener('input', recalc));
+    document.querySelectorAll('.info-btn').forEach(btn => {
+      btn.addEventListener('click', () => {
+        const panel = document.getElementById(btn.dataset.infoTarget);
+        const willOpen = !panel.classList.contains('open');
+        panel.classList.toggle('open', willOpen);
+        btn.setAttribute('aria-expanded', willOpen ? 'true' : 'false');
+      });
+    });
 
     const money = new Intl.NumberFormat('de-DE', { style: 'currency', currency: 'EUR', maximumFractionDigits: 0 });
     const money2 = new Intl.NumberFormat('de-DE', { style: 'currency', currency: 'EUR', maximumFractionDigits: 2 });
@@ -343,7 +402,7 @@
     function annualAllowance(annualContribution, activeChildren) {
       const part1 = Math.min(annualContribution, 360) * 0.5;
       const part2 = Math.max(Math.min(annualContribution - 360, 1440), 0) * 0.25;
-      const childPart = 300 * Math.min(activeChildren, Math.floor(annualContribution / 300));
+      const childPart = annualContribution >= 300 ? 300 * activeChildren : 0;
       return part1 + part2 + childPart;
     }
 
