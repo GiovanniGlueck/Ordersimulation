@@ -419,7 +419,9 @@
       const childYears = [val('child1'), val('child2'), val('child3'), val('child4'), val('child5'), val('child6')].map(v => Math.max(0, Math.floor(v)));
       const annual = monthly * 12;
 
-      let depot = 0;
+      let depotFunded = 0;
+      let depotUnfunded = 0;
+      let totalUnfundedContribution = 0;
       let etf = 0;
       let totalTaxSaving = 0;
       const rows = [];
@@ -427,12 +429,16 @@
       for (let year = 1; year <= years; year++) {
         const activeChildren = childYears.filter(v => v > (year - 1)).length;
         const allowance = annualAllowance(annual, activeChildren);
+        const fundedContribution = Math.min(annual, 1800);
+        const unfundedContribution = Math.max(annual - 1800, 0);
         const deductibleBase = Math.min(annual, 2100);
         const taxSaving = Math.max(deductibleBase * taxNow - allowance, 0);
         totalTaxSaving += taxSaving;
+        totalUnfundedContribution += unfundedContribution;
 
         if (year === 1) {
-          depot = annual + allowance;
+          depotFunded = fundedContribution + allowance;
+          depotUnfunded = unfundedContribution;
           const base = annual;
           const gainBeforeTax = Math.max(base * (expectedReturn - costEtf), 0);
           const vorabBase = base * 0.7 * basiszins;
@@ -440,7 +446,8 @@
           const tax = taxableVorab * 0.7 * 0.25;
           etf = base * (1 + expectedReturn - costEtf) - tax;
         } else {
-          depot = depot * (1 + expectedReturn - costDepot) + annual + allowance;
+          depotFunded = depotFunded * (1 + expectedReturn - costDepot) + fundedContribution + allowance;
+          depotUnfunded = depotUnfunded * (1 + expectedReturn - costDepot) + unfundedContribution;
           const base = etf + annual;
           const gainBeforeTax = Math.max(base * (expectedReturn - costEtf), 0);
           const vorabBase = base * 0.7 * basiszins;
@@ -449,12 +456,15 @@
           etf = base * (1 + expectedReturn - costEtf) - tax;
         }
 
-        rows.push({ year, allowance, taxSaving, depot, etf });
+        rows.push({ year, allowance, taxSaving, depot: depotFunded + depotUnfunded, etf });
       }
 
       const etfGain = Math.max(etf - annual * years, 0);
       const etfNet = etf - Math.max(etfGain - saverAllowance, 0) * 0.175;
-      const depotNet = depot * (1 - taxRet);
+      const depotFundedNet = depotFunded * (1 - taxRet);
+      const depotUnfundedGain = Math.max(depotUnfunded - totalUnfundedContribution, 0);
+      const depotUnfundedNet = totalUnfundedContribution + depotUnfundedGain * (1 - taxRet);
+      const depotNet = depotFundedNet + depotUnfundedNet;
       const diff = depotNet - etfNet;
       const totalAllowance = rows.reduce((s, r) => s + r.allowance, 0);
 
