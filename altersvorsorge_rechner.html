@@ -437,8 +437,8 @@
         totalUnfundedContribution += unfundedContribution;
 
         if (year === 1) {
-          depotFunded = fundedContribution + allowance;
-          depotUnfunded = unfundedContribution;
+          depotFunded = (fundedContribution + allowance) * (1 + expectedReturn - costDepot);
+          depotUnfunded = unfundedContribution * (1 + expectedReturn - costDepot);
           const base = annual;
           const gainBeforeTax = Math.max(base * (expectedReturn - costEtf), 0);
           const vorabBase = base * 0.7 * basiszins;
