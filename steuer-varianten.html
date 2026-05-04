@@ -209,6 +209,18 @@
       font-size: 13px;
     }
 
+    .effect-note {
+      margin-top: 9px;
+      max-width: 760px;
+      color: #354354;
+      background: #eef7f3;
+      border: 1px solid #c9e5d8;
+      border-radius: 7px;
+      padding: 9px 10px;
+      font-size: 13px;
+      line-height: 1.4;
+    }
+
     .legend {
       display: flex;
       flex-wrap: wrap;
@@ -379,7 +391,7 @@
         <h2>Annahmen</h2>
         <div class="field">
           <label for="start">Startkapital</label>
-          <input id="start" type="number" min="1000" step="1000" value="100000" />
+          <input id="start" type="number" min="1000" step="1000" value="10000" />
         </div>
         <div class="field">
           <label for="years">Laufzeit in Jahren</label>
@@ -403,7 +415,7 @@
         </div>
         <div class="field">
           <label for="baseRate">Basiszins Vorabpauschale</label>
-          <input id="baseRate" type="number" min="0" max="10" step="0.01" value="3.20" />
+          <input id="baseRate" type="number" min="0" max="10" step="0.01" value="1.70" />
         </div>
         <div class="field">
           <label for="tradingCost">Handelskosten p.a.</label>
@@ -424,6 +436,7 @@
           <div>
             <p class="chart-title">Nettovermögen nach Steuern</p>
             <p class="chart-note" id="chartNote"></p>
+            <p class="effect-note" id="effectNote"></p>
           </div>
           <div class="legend" id="legend"></div>
         </div>
@@ -516,6 +529,7 @@
     const summary = document.getElementById("summary");
     const legend = document.getElementById("legend");
     const chartNote = document.getElementById("chartNote");
+    const effectNote = document.getElementById("effectNote");
     const variantControls = document.getElementById("variantControls");
     const saleRows = document.getElementById("saleRows");
 
@@ -861,12 +875,28 @@
       `).join("");
     }
 
+    function renderEffectNote() {
+      const s = settings();
+      const firstYearBeforeTax = s.start * (1 + s.returnRate);
+      const lumpSum = advanceLumpSum(s.start, firstYearBeforeTax, s);
+      const taxableLumpSum = lumpSum * s.taxableShare;
+      if (taxableLumpSum >= s.allowance && s.allowance > 0) {
+        effectNote.textContent = `Bei diesen Annahmen nutzt Buy & Hold den Freisteller bereits durch die Vorabpauschale aus: Im ersten Jahr sind rund ${eur.format(taxableLumpSum).replace(",00", "")} steuerpflichtig. Deshalb bringt der zusätzliche Verkauf zur Freibetragsnutzung aktuell kaum einen Unterschied.`;
+      } else if (taxableLumpSum > 0) {
+        const remaining = s.allowance - taxableLumpSum;
+        effectNote.textContent = `Die Vorabpauschale nutzt im ersten Jahr rund ${eur.format(taxableLumpSum).replace(",00", "")} des Freistellers. Für gezielte Verkäufe bleiben damit etwa ${eur.format(remaining).replace(",00", "")} steuerpflichtiger Freibetrag übrig.`;
+      } else {
+        effectNote.textContent = "Bei diesen Annahmen fällt keine Vorabpauschale an. Der Unterschied zwischen Buy & Hold und gezielter Freibetragsnutzung wird dadurch deutlicher.";
+      }
+    }
+
     function render() {
       inputs.years.value = settings().years;
       const series = getSeries();
       renderSummary(series);
       renderSaleRows(series);
       renderLegend(series);
+      renderEffectNote();
       drawChart(series);
       const s = settings();
       chartNote.textContent = `${eur.format(s.start).replace(",00", "")} Startkapital, ${(s.returnRate * 100).toFixed(1).replace(".", ",")} % Rendite p.a., ${s.years} Jahre, Vorabpauschale mit ${(s.baseRate * 100).toFixed(2).replace(".", ",")} % Basiszins`;
