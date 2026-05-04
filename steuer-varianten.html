@@ -1,0 +1,881 @@
+<!doctype html>
+<html lang="de">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>ETF-Steuervarianten</title>
+  <style>
+    :root {
+      color-scheme: light;
+      --ink: #1f2933;
+      --muted: #607083;
+      --line: #d7dee8;
+      --panel: #f7f9fc;
+      --white: #ffffff;
+      --blue: #2563eb;
+      --green: #2f855a;
+      --red: #c2410c;
+      --purple: #7c3aed;
+      --focus: #0f766e;
+      --shadow: 0 14px 34px rgba(31, 41, 51, 0.10);
+    }
+
+    * { box-sizing: border-box; }
+
+    body {
+      margin: 0;
+      font-family: Aptos, Inter, system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+      color: var(--ink);
+      background: #eef3f8;
+    }
+
+    main {
+      min-height: 100vh;
+      display: grid;
+      grid-template-columns: minmax(320px, 380px) minmax(520px, 1fr);
+    }
+
+    aside {
+      background: var(--white);
+      border-right: 1px solid var(--line);
+      padding: 22px;
+      overflow-y: auto;
+    }
+
+    .workspace {
+      padding: 22px;
+      min-width: 0;
+    }
+
+    h1 {
+      margin: 0 0 6px;
+      font-size: 24px;
+      line-height: 1.15;
+      letter-spacing: 0;
+    }
+
+    .sub {
+      margin: 0 0 20px;
+      color: var(--muted);
+      font-size: 14px;
+      line-height: 1.45;
+    }
+
+    section {
+      margin-top: 22px;
+    }
+
+    h2 {
+      margin: 0 0 10px;
+      font-size: 13px;
+      text-transform: uppercase;
+      letter-spacing: 0;
+      color: #435366;
+    }
+
+    .field {
+      display: grid;
+      grid-template-columns: 1fr 112px;
+      gap: 12px;
+      align-items: center;
+      padding: 9px 0;
+      border-bottom: 1px solid #edf1f5;
+    }
+
+    .field label {
+      font-size: 14px;
+      color: #2f3b49;
+    }
+
+    .field input {
+      width: 100%;
+      height: 34px;
+      border: 1px solid #cad4df;
+      border-radius: 6px;
+      padding: 0 9px;
+      font: inherit;
+      color: var(--ink);
+      background: #fff;
+      text-align: right;
+    }
+
+    .variant-list {
+      display: grid;
+      gap: 10px;
+    }
+
+    .variant {
+      display: grid;
+      grid-template-columns: 22px 1fr;
+      gap: 10px;
+      align-items: start;
+      padding: 10px;
+      border: 1px solid var(--line);
+      border-radius: 8px;
+      background: #fbfdff;
+    }
+
+    .variant input {
+      width: 18px;
+      height: 18px;
+      margin-top: 1px;
+      accent-color: var(--focus);
+    }
+
+    .variant strong {
+      display: block;
+      font-size: 14px;
+      margin-bottom: 3px;
+    }
+
+    .variant span {
+      display: block;
+      font-size: 12px;
+      color: var(--muted);
+      line-height: 1.35;
+    }
+
+    .summary-grid {
+      display: grid;
+      grid-template-columns: repeat(4, minmax(150px, 1fr));
+      gap: 12px;
+      margin-bottom: 16px;
+    }
+
+    .metric {
+      background: var(--white);
+      border: 1px solid var(--line);
+      border-radius: 8px;
+      padding: 13px 14px;
+      min-height: 94px;
+      box-shadow: 0 8px 20px rgba(31, 41, 51, 0.05);
+    }
+
+    .metric .name {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      font-size: 13px;
+      color: var(--muted);
+      min-height: 32px;
+    }
+
+    .swatch {
+      width: 10px;
+      height: 10px;
+      border-radius: 50%;
+      flex: 0 0 auto;
+    }
+
+    .metric .value {
+      margin-top: 8px;
+      font-size: 23px;
+      font-weight: 750;
+      white-space: nowrap;
+    }
+
+    .metric .delta {
+      margin-top: 3px;
+      font-size: 12px;
+      color: var(--muted);
+      white-space: nowrap;
+    }
+
+    .chart-shell {
+      background: var(--white);
+      border: 1px solid var(--line);
+      border-radius: 8px;
+      box-shadow: var(--shadow);
+      padding: 16px;
+    }
+
+    .chart-top {
+      display: flex;
+      justify-content: space-between;
+      gap: 16px;
+      align-items: flex-start;
+      margin-bottom: 8px;
+    }
+
+    .chart-title {
+      font-size: 18px;
+      font-weight: 750;
+      margin: 0;
+    }
+
+    .chart-note {
+      margin: 4px 0 0;
+      color: var(--muted);
+      font-size: 13px;
+    }
+
+    .legend {
+      display: flex;
+      flex-wrap: wrap;
+      justify-content: flex-end;
+      gap: 10px 14px;
+      font-size: 13px;
+      color: #354354;
+      max-width: 520px;
+    }
+
+    .legend-item {
+      display: inline-flex;
+      align-items: center;
+      gap: 7px;
+      white-space: nowrap;
+    }
+
+    .legend-line {
+      width: 26px;
+      height: 3px;
+      border-radius: 999px;
+    }
+
+    canvas {
+      width: 100%;
+      height: 560px;
+      display: block;
+    }
+
+    .sale-panel {
+      margin-top: 16px;
+      background: var(--white);
+      border: 1px solid var(--line);
+      border-radius: 8px;
+      box-shadow: 0 8px 20px rgba(31, 41, 51, 0.05);
+      overflow: hidden;
+    }
+
+    .sale-panel h2 {
+      margin: 0;
+      padding: 14px 16px;
+      background: #f2f6fa;
+      border-bottom: 1px solid var(--line);
+      font-size: 14px;
+      text-transform: none;
+      color: var(--ink);
+    }
+
+    .sale-table {
+      width: 100%;
+      border-collapse: collapse;
+      font-size: 13px;
+    }
+
+    .sale-table th,
+    .sale-table td {
+      padding: 11px 12px;
+      border-bottom: 1px solid #edf1f5;
+      text-align: right;
+      white-space: nowrap;
+    }
+
+    .sale-table th:first-child,
+    .sale-table td:first-child {
+      text-align: left;
+      white-space: normal;
+    }
+
+    .sale-table th {
+      color: #435366;
+      background: #fbfdff;
+      font-weight: 700;
+    }
+
+    .sale-table tr:last-child td {
+      border-bottom: 0;
+    }
+
+    .variant-cell {
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+      font-weight: 700;
+    }
+
+    .suggestions {
+      display: grid;
+      grid-template-columns: repeat(3, minmax(180px, 1fr));
+      gap: 12px;
+      margin-top: 16px;
+    }
+
+    .suggestion {
+      border: 1px solid var(--line);
+      background: rgba(255,255,255,0.82);
+      border-radius: 8px;
+      padding: 12px;
+      font-size: 13px;
+      line-height: 1.4;
+      color: #354354;
+    }
+
+    .suggestion strong {
+      display: block;
+      margin-bottom: 4px;
+      color: var(--ink);
+      font-size: 14px;
+    }
+
+    @media (max-width: 1000px) {
+      main {
+        grid-template-columns: 1fr;
+      }
+
+      aside {
+        border-right: 0;
+        border-bottom: 1px solid var(--line);
+      }
+
+      .summary-grid,
+      .suggestions {
+        grid-template-columns: repeat(2, minmax(160px, 1fr));
+      }
+
+      canvas {
+        height: 460px;
+      }
+    }
+
+    @media (max-width: 620px) {
+      aside,
+      .workspace {
+        padding: 16px;
+      }
+
+      .summary-grid,
+      .suggestions {
+        grid-template-columns: 1fr;
+      }
+
+      .chart-top {
+        display: block;
+      }
+
+      .legend {
+        justify-content: flex-start;
+        margin-top: 10px;
+      }
+
+      canvas {
+        height: 380px;
+      }
+    }
+  </style>
+</head>
+<body>
+  <main>
+    <aside>
+      <h1>Steuervergleich</h1>
+      <p class="sub">Interaktive Simulation für ETF-Anlagevarianten nach Kosten, Vorabpauschale und Steuern.</p>
+
+      <section>
+        <h2>Varianten</h2>
+        <div class="variant-list" id="variantControls"></div>
+      </section>
+
+      <section>
+        <h2>Annahmen</h2>
+        <div class="field">
+          <label for="start">Startkapital</label>
+          <input id="start" type="number" min="1000" step="1000" value="100000" />
+        </div>
+        <div class="field">
+          <label for="years">Laufzeit in Jahren</label>
+          <input id="years" type="number" min="1" max="60" step="1" value="20" />
+        </div>
+        <div class="field">
+          <label for="returnRate">Rendite p.a.</label>
+          <input id="returnRate" type="number" min="-20" max="25" step="0.1" value="7.0" />
+        </div>
+        <div class="field">
+          <label for="allowance">Freisteller p.a.</label>
+          <input id="allowance" type="number" min="0" step="100" value="1000" />
+        </div>
+        <div class="field">
+          <label for="taxRate">Steuersatz</label>
+          <input id="taxRate" type="number" min="0" max="60" step="0.01" value="26.375" />
+        </div>
+        <div class="field">
+          <label for="taxableShare">Steuerpflichtiger Anteil</label>
+          <input id="taxableShare" type="number" min="0" max="100" step="1" value="70" />
+        </div>
+        <div class="field">
+          <label for="baseRate">Basiszins Vorabpauschale</label>
+          <input id="baseRate" type="number" min="0" max="10" step="0.01" value="3.20" />
+        </div>
+        <div class="field">
+          <label for="tradingCost">Handelskosten p.a.</label>
+          <input id="tradingCost" type="number" min="0" max="5" step="0.05" value="0.50" />
+        </div>
+        <div class="field">
+          <label for="fundCost">Fonds-Kosten p.a.</label>
+          <input id="fundCost" type="number" min="0" max="4" step="0.05" value="1.50" />
+        </div>
+      </section>
+    </aside>
+
+    <div class="workspace">
+      <div class="summary-grid" id="summary"></div>
+
+      <div class="chart-shell">
+        <div class="chart-top">
+          <div>
+            <p class="chart-title">Nettovermögen nach Steuern</p>
+            <p class="chart-note" id="chartNote"></p>
+          </div>
+          <div class="legend" id="legend"></div>
+        </div>
+        <canvas id="chart" aria-label="Vergleich der Anlagevarianten als Liniendiagramm"></canvas>
+      </div>
+
+      <div class="sale-panel">
+        <h2>Ende der Laufzeit nach Verkauf</h2>
+        <table class="sale-table">
+          <thead>
+            <tr>
+              <th>Variante</th>
+              <th>Depotwert vor Verkauf</th>
+              <th>Steuer während Laufzeit</th>
+              <th>Steuer beim Verkauf</th>
+              <th>Auszahlung nach Verkauf</th>
+            </tr>
+          </thead>
+          <tbody id="saleRows"></tbody>
+        </table>
+      </div>
+
+      <div class="suggestions">
+        <div class="suggestion">
+          <strong>Kernvergleich</strong>
+          Die drei Hauptvarianten sollten alle dieselbe Renditeannahme nutzen, damit Steuer- und Kostenwirkung sauber sichtbar bleiben.
+        </div>
+        <div class="suggestion">
+          <strong>Sinnvoller Benchmark</strong>
+          Ein gemanagter Fonds mit laufenden Kosten zeigt, wie stark Gebühren den Steuervorteil überlagern können.
+        </div>
+        <div class="suggestion">
+          <strong>Optionaler Ausbau</strong>
+          Die Vorabpauschale ist vereinfacht eingerechnet und reduziert den steuerpflichtigen Gewinn beim späteren Verkauf.
+        </div>
+      </div>
+    </div>
+  </main>
+
+  <script>
+    const variants = [
+      {
+        id: "trading",
+        name: "Häufiges Kaufen/Verkaufen",
+        shortName: "Trading",
+        color: "#c2410c",
+        enabled: true,
+        description: "Jährliche Realisierung, Handelskosten, Freisteller soweit ausreichend."
+      },
+      {
+        id: "buyHold",
+        name: "Buy & Hold",
+        shortName: "Buy & Hold",
+        color: "#2563eb",
+        enabled: true,
+        description: "Kein gezieltes Ausschöpfen des Freistellers, Steuer beim Verkauf."
+      },
+      {
+        id: "harvest",
+        name: "Buy & Hold mit Freisteller",
+        shortName: "Freisteller genutzt",
+        color: "#2f855a",
+        enabled: true,
+        description: "Jährlicher Verkauf genau in Höhe der nutzbaren steuerfreien Gewinne."
+      },
+      {
+        id: "managed",
+        name: "Gemanagter Fonds",
+        shortName: "Gemanagter Fonds",
+        color: "#7c3aed",
+        enabled: false,
+        description: "Benchmark mit laufenden Fonds-Kosten und normaler Freisteller-Nutzung."
+      }
+    ];
+
+    const inputs = {
+      start: document.getElementById("start"),
+      years: document.getElementById("years"),
+      returnRate: document.getElementById("returnRate"),
+      allowance: document.getElementById("allowance"),
+      taxRate: document.getElementById("taxRate"),
+      taxableShare: document.getElementById("taxableShare"),
+      baseRate: document.getElementById("baseRate"),
+      tradingCost: document.getElementById("tradingCost"),
+      fundCost: document.getElementById("fundCost")
+    };
+
+    const canvas = document.getElementById("chart");
+    const ctx = canvas.getContext("2d");
+    const summary = document.getElementById("summary");
+    const legend = document.getElementById("legend");
+    const chartNote = document.getElementById("chartNote");
+    const variantControls = document.getElementById("variantControls");
+    const saleRows = document.getElementById("saleRows");
+
+    const eur = new Intl.NumberFormat("de-DE", {
+      style: "currency",
+      currency: "EUR",
+      maximumFractionDigits: 0
+    });
+
+    function pctInput(id) {
+      return Number(inputs[id].value || 0) / 100;
+    }
+
+    function moneyInput(id) {
+      return Math.max(0, Number(inputs[id].value || 0));
+    }
+
+    function settings() {
+      return {
+        start: moneyInput("start"),
+        years: Math.max(1, Math.min(60, Math.round(Number(inputs.years.value || 1)))),
+        returnRate: pctInput("returnRate"),
+        allowance: moneyInput("allowance"),
+        taxRate: pctInput("taxRate"),
+        taxableShare: pctInput("taxableShare"),
+        baseRate: pctInput("baseRate"),
+        tradingCost: pctInput("tradingCost"),
+        fundCost: pctInput("fundCost")
+      };
+    }
+
+    function taxOnGain(gain, allowance, taxRate, taxableShare) {
+      return Math.max(gain * taxableShare - allowance, 0) * taxRate;
+    }
+
+    function advanceLumpSum(startValue, endValue, s) {
+      const valueIncrease = Math.max(endValue - startValue, 0);
+      const baseReturn = startValue * s.baseRate * 0.7;
+      return Math.max(0, Math.min(valueIncrease, baseReturn));
+    }
+
+    function simulateTrading(s) {
+      let value = s.start;
+      const points = [value];
+      let annualTaxPaid = 0;
+      for (let year = 1; year <= s.years; year++) {
+        const grossGain = value * s.returnRate;
+        const costs = value * s.tradingCost;
+        const taxableGain = Math.max(grossGain - costs, 0);
+        const tax = taxOnGain(taxableGain, s.allowance, s.taxRate, s.taxableShare);
+        annualTaxPaid += tax;
+        value = value + grossGain - costs - tax;
+        points.push(value);
+      }
+      return {
+        points,
+        grossFinal: value,
+        annualTaxPaid,
+        finalSaleTax: 0,
+        netFinal: value
+      };
+    }
+
+    function simulateBuyHold(s) {
+      let value = s.start;
+      let taxedGainCredit = 0;
+      let annualTaxPaid = 0;
+      const points = [value];
+      let finalTax = 0;
+      for (let year = 1; year <= s.years; year++) {
+        const startValue = value;
+        const endBeforeTax = startValue * (1 + s.returnRate);
+        const lumpSum = advanceLumpSum(startValue, endBeforeTax, s);
+        const taxableLumpSum = lumpSum * s.taxableShare;
+        const lumpSumTax = Math.max(taxableLumpSum - s.allowance, 0) * s.taxRate;
+        const remainingAllowanceAtSale = Math.max(s.allowance - taxableLumpSum, 0);
+        taxedGainCredit += lumpSum;
+        annualTaxPaid += lumpSumTax;
+        value = endBeforeTax - lumpSumTax;
+        const saleGain = Math.max(value - s.start - taxedGainCredit, 0);
+        finalTax = Math.max(saleGain * s.taxableShare - remainingAllowanceAtSale, 0) * s.taxRate;
+        points.push(value - finalTax);
+      }
+      return {
+        points,
+        grossFinal: value,
+        annualTaxPaid,
+        finalSaleTax: finalTax,
+        netFinal: value - finalTax
+      };
+    }
+
+    function simulateHarvest(s) {
+      let value = s.start;
+      let taxedGainCredit = 0;
+      let annualTaxPaid = 0;
+      const points = [value];
+      let finalTax = 0;
+      for (let year = 1; year <= s.years; year++) {
+        const startValue = value;
+        const endBeforeTax = startValue * (1 + s.returnRate);
+        const lumpSum = advanceLumpSum(startValue, endBeforeTax, s);
+        const taxableLumpSum = lumpSum * s.taxableShare;
+        const lumpSumTax = Math.max(taxableLumpSum - s.allowance, 0) * s.taxRate;
+        const remainingAllowance = Math.max(s.allowance - taxableLumpSum, 0);
+        value = endBeforeTax - lumpSumTax;
+        taxedGainCredit += lumpSum;
+        annualTaxPaid += lumpSumTax;
+
+        const unrealizedGrossGain = Math.max(value - s.start - taxedGainCredit, 0);
+        const taxFreeGrossGain = s.taxableShare > 0 ? s.allowance / s.taxableShare : 0;
+        const realizedThisYear = Math.min(unrealizedGrossGain, remainingAllowance / Math.max(s.taxableShare, 0.000001), taxFreeGrossGain);
+        taxedGainCredit += Math.max(realizedThisYear, 0);
+        const remainingAllowanceAtSale = Math.max(remainingAllowance - Math.max(realizedThisYear, 0) * s.taxableShare, 0);
+        const remainingGain = Math.max(value - s.start - taxedGainCredit, 0);
+        const taxAtSale = Math.max(remainingGain * s.taxableShare - remainingAllowanceAtSale, 0) * s.taxRate;
+        finalTax = taxAtSale;
+        points.push(value - taxAtSale);
+      }
+      return {
+        points,
+        grossFinal: value,
+        annualTaxPaid,
+        finalSaleTax: finalTax,
+        netFinal: value - finalTax
+      };
+    }
+
+    function simulateManaged(s) {
+      let value = s.start;
+      let taxedGainCredit = 0;
+      let annualTaxPaid = 0;
+      const points = [value];
+      let finalTax = 0;
+      for (let year = 1; year <= s.years; year++) {
+        const startValue = value;
+        const endBeforeTax = startValue * (1 + s.returnRate) * (1 - s.fundCost);
+        const lumpSum = advanceLumpSum(startValue, endBeforeTax, s);
+        const taxableLumpSum = lumpSum * s.taxableShare;
+        const lumpSumTax = Math.max(taxableLumpSum - s.allowance, 0) * s.taxRate;
+        const remainingAllowanceAtSale = Math.max(s.allowance - taxableLumpSum, 0);
+        taxedGainCredit += lumpSum;
+        annualTaxPaid += lumpSumTax;
+        value = endBeforeTax - lumpSumTax;
+        const saleGain = Math.max(value - s.start - taxedGainCredit, 0);
+        finalTax = Math.max(saleGain * s.taxableShare - remainingAllowanceAtSale, 0) * s.taxRate;
+        points.push(value - finalTax);
+      }
+      return {
+        points,
+        grossFinal: value,
+        annualTaxPaid,
+        finalSaleTax: finalTax,
+        netFinal: value - finalTax
+      };
+    }
+
+    function getSeries() {
+      const s = settings();
+      const calculators = {
+        trading: simulateTrading,
+        buyHold: simulateBuyHold,
+        harvest: simulateHarvest,
+        managed: simulateManaged
+      };
+      return variants
+        .filter(v => v.enabled)
+        .map(v => ({ ...v, ...calculators[v.id](s) }));
+    }
+
+    function resizeCanvas() {
+      const rect = canvas.getBoundingClientRect();
+      const scale = window.devicePixelRatio || 1;
+      canvas.width = Math.max(320, Math.floor(rect.width * scale));
+      canvas.height = Math.max(260, Math.floor(rect.height * scale));
+      ctx.setTransform(scale, 0, 0, scale, 0, 0);
+      return rect;
+    }
+
+    function niceStep(rawStep) {
+      const magnitude = Math.pow(10, Math.floor(Math.log10(rawStep)));
+      const normalized = rawStep / magnitude;
+      if (normalized <= 1) return magnitude;
+      if (normalized <= 2) return 2 * magnitude;
+      if (normalized <= 5) return 5 * magnitude;
+      return 10 * magnitude;
+    }
+
+    function drawChart(series) {
+      const rect = resizeCanvas();
+      const width = rect.width;
+      const height = rect.height;
+      ctx.clearRect(0, 0, width, height);
+
+      const allValues = series.flatMap(s => s.points);
+      const minValue = Math.min(...allValues);
+      const maxValue = Math.max(...allValues);
+      const span = Math.max(maxValue - minValue, 1);
+      const yMin = Math.max(0, minValue - span * 0.08);
+      const yMax = maxValue + span * 0.16;
+      const step = niceStep((yMax - yMin) / 5);
+      const s = settings();
+      const left = 76;
+      const right = 150;
+      const top = 28;
+      const bottom = 72;
+      const plotW = width - left - right;
+      const plotH = height - top - bottom;
+
+      const x = year => left + (year / s.years) * plotW;
+      const y = value => top + (1 - (value - yMin) / (yMax - yMin)) * plotH;
+
+      ctx.font = "12px Aptos, system-ui, sans-serif";
+      ctx.textBaseline = "middle";
+      ctx.lineWidth = 1;
+
+      ctx.strokeStyle = "#d7dee8";
+      ctx.fillStyle = "#607083";
+      ctx.textAlign = "right";
+      for (let tick = Math.ceil(yMin / step) * step; tick <= yMax; tick += step) {
+        const yy = y(tick);
+        ctx.beginPath();
+        ctx.moveTo(left, yy);
+        ctx.lineTo(width - right, yy);
+        ctx.stroke();
+        ctx.fillText(eur.format(tick).replace(",00", ""), left - 10, yy);
+      }
+
+      ctx.strokeStyle = "#99a8b8";
+      ctx.beginPath();
+      ctx.moveTo(left, top);
+      ctx.lineTo(left, height - bottom);
+      ctx.lineTo(width - right, height - bottom);
+      ctx.stroke();
+
+      ctx.fillStyle = "#435366";
+      ctx.textAlign = "center";
+      const yearStep = s.years <= 20 ? 5 : 10;
+      for (let year = 0; year <= s.years; year += yearStep) {
+        const xx = x(year);
+        ctx.beginPath();
+        ctx.moveTo(xx, height - bottom);
+        ctx.lineTo(xx, height - bottom + 5);
+        ctx.stroke();
+        ctx.fillText(String(year), xx, height - bottom + 22);
+      }
+
+      ctx.save();
+      ctx.translate(22, top + plotH / 2);
+      ctx.rotate(-Math.PI / 2);
+      ctx.fillStyle = "#1f2933";
+      ctx.font = "700 13px Aptos, system-ui, sans-serif";
+      ctx.fillText("Nettovermögen nach Steuern", 0, 0);
+      ctx.restore();
+      ctx.fillText("Jahr", left + plotW / 2, height - 18);
+
+      series.forEach(item => {
+        ctx.strokeStyle = item.color;
+        ctx.lineWidth = item.id === "harvest" ? 3.2 : 2.7;
+        ctx.beginPath();
+        item.points.forEach((value, year) => {
+          const xx = x(year);
+          const yy = y(value);
+          if (year === 0) ctx.moveTo(xx, yy);
+          else ctx.lineTo(xx, yy);
+        });
+        ctx.stroke();
+
+        const final = item.points[item.points.length - 1];
+        const xx = x(s.years);
+        const yy = y(final);
+        ctx.fillStyle = item.color;
+        ctx.beginPath();
+        ctx.arc(xx, yy, 4, 0, Math.PI * 2);
+        ctx.fill();
+        ctx.font = "700 12px Aptos, system-ui, sans-serif";
+        ctx.textAlign = "left";
+        ctx.textBaseline = "middle";
+        ctx.fillText(eur.format(final).replace(",00", ""), xx + 9, yy);
+      });
+    }
+
+    function renderControls() {
+      variantControls.innerHTML = variants.map(v => `
+        <label class="variant">
+          <input type="checkbox" data-variant="${v.id}" ${v.enabled ? "checked" : ""} />
+          <span>
+            <strong>${v.name}</strong>
+            <span>${v.description}</span>
+          </span>
+        </label>
+      `).join("");
+      variantControls.querySelectorAll("input").forEach(input => {
+        input.addEventListener("change", event => {
+          const variant = variants.find(v => v.id === event.target.dataset.variant);
+          variant.enabled = event.target.checked;
+          if (!variants.some(v => v.enabled)) variant.enabled = true;
+          render();
+        });
+      });
+    }
+
+    function renderSummary(series) {
+      const finals = series.map(s => s.netFinal);
+      const best = Math.max(...finals);
+      summary.innerHTML = series.map(item => {
+        const final = item.netFinal;
+        const diff = final - best;
+        const delta = Math.abs(diff) < 1 ? "beste Variante" : `${eur.format(diff).replace(",00", "")} zur besten`;
+        return `
+          <div class="metric">
+            <div class="name"><span class="swatch" style="background:${item.color}"></span>${item.name}</div>
+            <div class="value">${eur.format(final).replace(",00", "")}</div>
+            <div class="delta">${delta}</div>
+          </div>
+        `;
+      }).join("");
+    }
+
+    function renderSaleRows(series) {
+      saleRows.innerHTML = series.map(item => `
+        <tr>
+          <td>
+            <span class="variant-cell">
+              <span class="swatch" style="background:${item.color}"></span>
+              ${item.name}
+            </span>
+          </td>
+          <td>${eur.format(item.grossFinal).replace(",00", "")}</td>
+          <td>${eur.format(item.annualTaxPaid).replace(",00", "")}</td>
+          <td>${eur.format(item.finalSaleTax).replace(",00", "")}</td>
+          <td><strong>${eur.format(item.netFinal).replace(",00", "")}</strong></td>
+        </tr>
+      `).join("");
+    }
+
+    function renderLegend(series) {
+      legend.innerHTML = series.map(item => `
+        <span class="legend-item">
+          <span class="legend-line" style="background:${item.color}"></span>
+          ${item.shortName}
+        </span>
+      `).join("");
+    }
+
+    function render() {
+      inputs.years.value = settings().years;
+      const series = getSeries();
+      renderSummary(series);
+      renderSaleRows(series);
+      renderLegend(series);
+      drawChart(series);
+      const s = settings();
+      chartNote.textContent = `${eur.format(s.start).replace(",00", "")} Startkapital, ${(s.returnRate * 100).toFixed(1).replace(".", ",")} % Rendite p.a., ${s.years} Jahre, Vorabpauschale mit ${(s.baseRate * 100).toFixed(2).replace(".", ",")} % Basiszins`;
+    }
+
+    Object.values(inputs).forEach(input => input.addEventListener("input", render));
+    window.addEventListener("resize", render);
+    renderControls();
+    render();
+  </script>
+</body>
+</html>

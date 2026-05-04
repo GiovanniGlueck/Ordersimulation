@@ -3,7 +3,7 @@
 <head>
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
-  <title>Ordermaske und Altersvorsorge-Rechner</title>
+  <title>Geldanlagekurs Rechner</title>
   <style>
     :root {
       --bg: #eef3f9;
@@ -116,6 +116,7 @@
         <div class="tabs" role="tablist" aria-label="Tool-Auswahl">
           <button class="tab-btn active" type="button" data-target="frame-order" role="tab" aria-selected="true">Ordermaske</button>
           <button class="tab-btn" type="button" data-target="frame-vorsorge" role="tab" aria-selected="false">Altersvorsorge-Rechner</button>
+          <button class="tab-btn" type="button" data-target="frame-steuern" role="tab" aria-selected="false">Steuer-Varianten</button>
         </div>
       </div>
 
@@ -126,6 +127,10 @@
 
         <section class="frame-wrap" id="frame-vorsorge">
           <iframe id="iframe-vorsorge" src="altersvorsorge_rechner.html" title="Altersvorsorgedepot vs. ETF" loading="lazy"></iframe>
+        </section>
+
+        <section class="frame-wrap" id="frame-steuern">
+          <iframe id="iframe-steuern" src="steuer-varianten.html" title="Steuer-Varianten bei ETF-Anlagen" loading="lazy"></iframe>
         </section>
       </div>
     </section>
